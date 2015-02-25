@@ -1,0 +1,44 @@
+{
+  "name"        : "empty-node-server",
+  "version"     : "0.0.0",
+  "description" : "A repository with all the infrastructure for starting a new Node server",
+  "author"      : "Glen E. Ivey",
+  "homepage": "https://github.com/gleneivey/empty-node-server",
+  "repository"  : {
+    "type": "git",
+    "url" : "git@github.com:gleneivey/empty-node-server.git"
+  },
+  "bugs": { "url": "https://github.com/gleneivey/empty-node-server/issues" },
+  "licenses": "MIT",
+  "main": "index",
+  "scripts": {
+    "start": "/usr/bin/env bash -c 'source envs/development.sh ; node index'",
+    "test":  "grunt"
+  },
+  "engines": {
+    "node": "~0.10.0",
+    "npm": "2.1.6"
+  },
+  "dependencies": {
+    "bluebird": "^2.9.6",
+    "environmental": "^1.2.0",
+    "lodash": "^3.1.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.0",
+    "grunt-env": "~0.4.2",
+    "grunt-environmental": "^0.1.0",
+    "grunt-express-server": "git://github.com/ericclemmons/grunt-express-server.git",
+    "grunt-jscs": "^1.2.0",
+    "grunt-mocha-cli": "^1.10.0",
+    "grunt-shell": "^1.1.1",
+    "matchdep": "^0.3.0",
+    "mocha-multi": "^0.6.0",
+    "quick-grunt-config-coding-conventions": "0.0.2",
+    "quick-grunt-config-mocha-sauce": "0.0.1",
+    "rewire": "^2.1.0",
+    "should": "^5.0.0",
+    "sinon": "^1.10.3"
+  }
+}
