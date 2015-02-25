@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <external_stories type="array">
   <external_story>
-    <external_id>foo</external_id>
-    <name>More power to shields</name>
-    <description></description>
-    <requested_by>James Kirk</requested_by>
-    <created_at type="datetime">2008/12/10 00:00:00 UTC</created_at>
+    <external_id>2</external_id>
     <story_type>feature</story_type>
-    <estimate type="integer">1</estimate>
+    <name>On story-import request from Tracker, makes request to GitHub for issues, reformats result from GH and returns to Tracker in XML</name>
+    <requested_by>tracker-common</requested_by>
+    <created_at type="datetime">2015-02-25T20:53:56Z</created_at>
+    <description>Will need to have unit tests stub out request to GitHub, so need an actual response for test data.
+
+How do we want to handle outbound server requests for integration testing?
+</description>
+    <owned_by>tracker-common</owned_by>
   </external_story>
   <external_story>
-    <external_id>bar</external_id>
-    <name>I am story 2</name>
-    <description>I am a description</description>
-    <requested_by>I am the reporter</requested_by>
-    <created_at type="datetime">2009/12/10 00:00:00 UTC</created_at>
-    <story_type>bug</story_type>
-    <estimate type="integer">2</estimate>
+    <external_id>1</external_id>
+    <story_type>feature</story_type>
+    <name>Server responds to GET requests for story imports from Tracker</name>
+    <requested_by>tracker-common</requested_by>
+    <created_at type="datetime">2015-02-25T20:45:21Z</created_at>
   </external_story>
 </external_stories>

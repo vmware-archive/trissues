@@ -1,5 +1,13 @@
-function loadTestTasks() {
+function loadTestTasks(grunt) {
+  grunt.registerTask("test-external", "run external integration API tests (mocha)",
+      ["environmental:test", "mochacli:external"]);
+
   return {
+    mochacli: {
+      external: { options: { filesRaw: [
+        "test/external/**/*_spec.js"
+      ] } }
+    },
     express: {
       "test-server": {
         options: {

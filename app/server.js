@@ -3,7 +3,7 @@ var config = require("environmental").config(),
     handlers = require("./handlers.js");
 
 function launch() {
-  var port = parseInt(config.server.port) || 8001,
+  var port =  process.env.VCAP_APP_PORT || config.server.port || 8001,
       server = restify.createServer({
         name: "trissues",
         version: "0.0.0",
@@ -15,7 +15,7 @@ function launch() {
       });
 
   server.get("/githubissues", handlers.githubissues);
-  server.listen(port);
+  server.listen(parseInt(port));
   console.log("Server running at http://127.0.0.1:" + port + "/  (" + process.env.NODE_ENV + " mode)");
 }
 

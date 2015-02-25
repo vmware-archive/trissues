@@ -1,0 +1,10 @@
+---
+applications:
+- instances: 1
+  framework:
+    info:
+      description: Node.js Application
+      memory: 128M
+    name: node
+  name: trissues
+  memory: 128M

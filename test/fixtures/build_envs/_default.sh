@@ -20,7 +20,10 @@
 #   - DEPLOY_ENV="staging"    # the machine you are actually running on
 #   - DEBUG=*.*               # Used to control debug levels per module
 
-export NODE_APP_PREFIX="NODEAPP"
-export NODEAPP_SERVER_PORT="8000"
+export NODE_APP_PREFIX="TRISSUES"
+export TRISSUES_SERVER_PORT="8000"
+export TRISSUES_GITHUB_REPO="pivotaltracker/trissues"
+
+export TRISSUES_AUTH_GITHUB=${TRISSUES_AUTH_GITHUB:="fake-test-token"}
 
 export multi="spec=-"
