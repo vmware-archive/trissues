@@ -1,14 +1,14 @@
 {
-  "name"        : "empty-node-server",
+  "name"        : "trissues",
   "version"     : "0.0.0",
-  "description" : "A repository with all the infrastructure for starting a new Node server",
-  "author"      : "Glen E. Ivey",
-  "homepage": "https://github.com/gleneivey/empty-node-server",
+  "description" : "A service to link Pivotal Tracker to Github Issues",
+  "author"      : "Glen E. Ivey, Jeff Turley, Copyright Pivotal",
+  "homepage": "https://github.com/pivotaltracker/trissues",
   "repository"  : {
     "type": "git",
-    "url" : "git@github.com:gleneivey/empty-node-server.git"
+    "url" : "https://github.com/pivotaltracker/trissues.git"
   },
-  "bugs": { "url": "https://github.com/gleneivey/empty-node-server/issues" },
+  "bugs": { "url": "https://github.com/pivotaltracker/trissues/issues" },
   "licenses": "MIT",
   "main": "index",
   "scripts": {
@@ -22,7 +22,8 @@
   "dependencies": {
     "bluebird": "^2.9.6",
     "environmental": "^1.2.0",
-    "lodash": "^3.1.0"
+    "lodash": "^3.1.0",
+    "restify": "^2.8.5"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

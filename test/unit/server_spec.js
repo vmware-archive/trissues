@@ -24,9 +24,11 @@ describe("top-level server", function () {
   });
 
   it("creates an HTTP server and listens on the configured port", function () {
-    var http = server.__get__("http"),
-        createStub = sandbox.stub(http, "createServer"),
-        fakeServer = { listen: sandbox.stub() };
+    var handlerModule = server.__get__("handlers"),
+        githubissuesHandler = handlerModule.githubissues,
+        restify = server.__get__("restify"),
+        createStub = sandbox.stub(restify, "createServer"),
+        fakeServer = { listen: sandbox.stub(), get: sandbox.stub() };
 
     createStub.returns(fakeServer);
     config.server.port = "4242";
@@ -35,5 +37,9 @@ describe("top-level server", function () {
 
     fakeServer.listen.calledOnce.should.be.true;
     fakeServer.listen.firstCall.calledWith(4242).should.be.true;
+
+    fakeServer.get.calledOnce.should.be.true;
+    fakeServer.get.firstCall.args[0].should.be.equal("/githubissues");
+    fakeServer.get.firstCall.args[1].should.be.equal(githubissuesHandler);
   });
 });
