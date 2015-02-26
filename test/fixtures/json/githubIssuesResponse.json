@@ -27,7 +27,13 @@
       "type": "User",
       "site_admin": false
     },
-    "labels": [],
+    "labels": [
+      {
+        "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+        "name": "feature",
+        "color": "f29513"
+      }
+    ],
     "state": "open",
     "locked": false,
     "assignee": {
@@ -84,7 +90,13 @@
       "type": "User",
       "site_admin": false
     },
-    "labels": [],
+    "labels": [
+      {
+        "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+        "name": "low-priority",
+        "color": "f29513"
+      }
+    ],
     "state": "open",
     "locked": false,
     "assignee": null,

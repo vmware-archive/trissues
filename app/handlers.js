@@ -7,11 +7,24 @@ var restify = require("restify"),
           headers: {
             Authorization: "token " + config.auth.github
           }
-        });
+        }),
+            filteredLabels = (function () {
+              if (config.filteredlabels) {
+                return config.filteredlabels.split(/, */);
+              } else {
+                return [];
+              }
+            }());
         client.get("/repos/" + config.github.repo + "/issues", function (err, githubReq, githubRes, issues) {
           var xmlResponse = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><external_stories type=\"array\">";
-
           issues.forEach(function (issue) {
+            if (issue.labels.some(
+              function (label) {
+                return filteredLabels.indexOf(label.name) !== -1;
+              })) {
+              return;
+            }
+
             xmlResponse += "<external_story>"
               + "<external_id>" + issue.number + "</external_id>"
               + "<story_type>feature</story_type>"
