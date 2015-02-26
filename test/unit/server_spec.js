@@ -13,15 +13,21 @@ describe("top-level server", function () {
   var handlerModule = server.__get__("handlers"),
       config,
       fakeServer,
+      restify,
       sandbox;
 
   beforeEach(function () {
     sandbox = sinon.sandbox.create();
     config = server.__get__("config");
-    fakeServer = { listen: sandbox.stub(), get: sandbox.stub(), post: sandbox.stub() };
+    fakeServer = {
+      listen: sandbox.stub(),
+      get: sandbox.stub(),
+      post: sandbox.stub(),
+      use: sandbox.stub()
+    };
 
-    var restify = server.__get__("restify"),
-        createStub = sandbox.stub(restify, "createServer");
+    restify = server.__get__("restify");
+    var createStub = sandbox.stub(restify, "createServer");
     createStub.returns(fakeServer);
   });
 
@@ -39,11 +45,30 @@ describe("top-level server", function () {
     fakeServer.listen.firstCall.calledWith(4242).should.be.true;
   });
 
-  it("routes the GET /githubissues endpoing", function () {
+  it("installs the standard bodyParser", function () {
+    var knownBodyParser = restify.bodyParser();
+    sandbox.stub(restify, "bodyParser");
+    restify.bodyParser.returns(knownBodyParser);
+
+    server.launch();
+
+    fakeServer.use.calledOnce.should.be.true;
+    fakeServer.use.firstCall.args[0].should.be.equal(knownBodyParser);
+  });
+
+  it("routes the GET /githubissues endpoint", function () {
     server.launch();
 
     fakeServer.get.calledOnce.should.be.true;
     fakeServer.get.firstCall.args[0].should.be.equal("/githubissues");
     fakeServer.get.firstCall.args[1].should.be.equal(handlerModule.githubissues);
+  });
+
+  it("routes the POST /fromtracker endpoint", function () {
+    server.launch();
+
+    fakeServer.post.calledOnce.should.be.true;
+    fakeServer.post.firstCall.args[0].should.be.equal("/fromtracker");
+    fakeServer.post.firstCall.args[1].should.be.equal(handlerModule.fromtracker);
   });
 });

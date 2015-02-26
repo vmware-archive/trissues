@@ -1,0 +1,56 @@
+{
+  "kind": "task_update_activity",
+  "guid": "1286564_8",
+  "project_version": 8,
+  "message": "Glen Ivey rewrote task: \"Do the first part.\"",
+  "highlight": "rewrote task:",
+  "changes": [
+    {
+      "kind": "story",
+      "change_type": "update",
+      "id": 89146028,
+      "original_values": {
+        "updated_at": "2015-02-26T00:27:09Z"
+      },
+      "new_values": {
+        "updated_at": "2015-02-26T00:27:22Z"
+      },
+      "name": "On story-import request from Tracker, makes request to GitHub for issues, reformats result from GH and returns to Tracker in XML",
+      "story_type": "feature"
+    },
+    {
+      "kind": "task",
+      "change_type": "update",
+      "id": 29481922,
+      "original_values": {
+        "description": "This is a task; being used for testing",
+        "updated_at": "2015-02-26T00:27:09Z"
+      },
+      "new_values": {
+        "description": "Do the first part.",
+        "updated_at": "2015-02-26T00:27:22Z"
+      }
+    }
+  ],
+  "primary_resources": [
+    {
+      "kind": "story",
+      "id": 89146028,
+      "name": "On story-import request from Tracker, makes request to GitHub for issues, reformats result from GH and returns to Tracker in XML",
+      "story_type": "feature",
+      "url": "https://www.pivotaltracker.com/story/show/89146028"
+    }
+  ],
+  "project": {
+    "kind": "project",
+    "id": 1286564,
+    "name": "TRIssues"
+  },
+  "performed_by": {
+    "kind": "person",
+    "id": 101384,
+    "name": "Glen Ivey",
+    "initials": "GI"
+  },
+  "occurred_at": "2015-02-26T00:27:22Z"
+}

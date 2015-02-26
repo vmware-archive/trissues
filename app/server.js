@@ -14,7 +14,9 @@ function launch() {
         }
       });
 
+  server.use(restify.bodyParser());
   server.get("/githubissues", handlers.githubissues);
+  server.post("/fromtracker", handlers.fromtracker);
   server.listen(parseInt(port));
   console.log("Server running at http://127.0.0.1:" + port + "/  (" + process.env.NODE_ENV + " mode)");
 }

@@ -49,6 +49,13 @@ var restify = require("restify"),
           res.send(200, xmlResponse);
           return next();
         });
+      },
+
+
+      fromtracker: function (req, res, next) {
+//console.log(req.body);
+        res.send(200);
+        return next();
       }
     };
 

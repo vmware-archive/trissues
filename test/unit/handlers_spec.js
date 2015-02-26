@@ -6,7 +6,6 @@ var should = require("should"),
     sinon = require("sinon"),
     fs = require("fs"),
     parseXml = require("xml2js").parseString,
-    //environmental = require("environmental"),
 
     // code under test
     handlers = rewireInApp("handlers"),
@@ -14,9 +13,7 @@ var should = require("should"),
     //Something useful
     sandbox,
     res,
-    next,
-    jsonResponse = fs.readFileSync(__dirname+"/../fixtures/json/githubIssuesResponse.json", { encoding: "utf8" }),
-    xmlResponse = fs.readFileSync(__dirname+"/../fixtures/xml/fixtureResponse.xml", { encoding: "utf8" });
+    next;
 
 
 describe("handlers", function () {
@@ -30,6 +27,9 @@ describe("handlers", function () {
   });
 
   describe("githubissues", function () {
+    var jsonResponse = fs.readFileSync(__dirname+"/../fixtures/json/githubIssuesResponse.json", { encoding: "utf8" }),
+        xmlResponse = fs.readFileSync(__dirname+"/../fixtures/xml/fixtureResponse.xml", { encoding: "utf8" });
+
     it("returns fixture stories", function () {
       var restify = handlers.__get__("restify"),
           createJsonClientStub = sandbox.stub(restify, "createJsonClient"),
@@ -42,11 +42,11 @@ describe("handlers", function () {
       createJsonClientStub.returns(mockClient);
 
       handlers.githubissues(null, res, next);
+      next.calledOnce.should.be.true;
 
       res.send.calledOnce.should.be.true;
       res.send.firstCall.args[0].should.equal(200);
       res.send.firstCall.args[1].replace(/\s+/g, "").should.equal(xmlResponse.replace(/\s+/g, ""));
-      next.calledOnce.should.be.true;
     });
 
     it("can filter out specified label", function () {
@@ -101,6 +101,20 @@ describe("handlers", function () {
 
       should.not.exist(externalStories.externalStory);
       next.calledOnce.should.be.true;
+    });
+  });
+
+  describe("fromtracker", function () {
+    it("accepts but ignores activity we don't care about", function () {
+      var req = {
+        body: JSON.parse(fs.readFileSync(__dirname+"/../fixtures/json/trackerWebhookTaskEdit.json", { encoding: "utf8" }))
+      };
+
+      handlers.fromtracker(req, res, next);
+      next.calledOnce.should.be.true;
+
+      res.send.calledOnce.should.be.true;
+      res.send.firstCall.args[0].should.equal(200);
     });
   });
 });
