@@ -11,8 +11,8 @@ module.exports = {
       }
     }),
     filteredLabels = (function () {
-      if (config.filteredlabels) {
-        return config.filteredlabels.split(/, */);
+      if (config.exclude && config.exclude.labels) {
+        return config.exclude.labels.split(/, */);
       } else {
         return [];
       }
