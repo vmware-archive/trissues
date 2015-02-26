@@ -1,1 +1,3 @@
-../node_modules/quick-grunt-config-mocha-sauce/lib/mocha.opts
+--timeout 1000
+--reporter mocha-multi
+--no-exit
