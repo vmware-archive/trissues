@@ -10,12 +10,19 @@ var sinon = require("sinon"),
 
 
 describe("top-level server", function () {
-  var config,
+  var handlerModule = server.__get__("handlers"),
+      config,
+      fakeServer,
       sandbox;
 
   beforeEach(function () {
     sandbox = sinon.sandbox.create();
     config = server.__get__("config");
+    fakeServer = { listen: sandbox.stub(), get: sandbox.stub(), post: sandbox.stub() };
+
+    var restify = server.__get__("restify"),
+        createStub = sandbox.stub(restify, "createServer");
+    createStub.returns(fakeServer);
   });
 
   afterEach(function () {
@@ -24,22 +31,19 @@ describe("top-level server", function () {
   });
 
   it("creates an HTTP server and listens on the configured port", function () {
-    var handlerModule = server.__get__("handlers"),
-        githubissuesHandler = handlerModule.githubissues,
-        restify = server.__get__("restify"),
-        createStub = sandbox.stub(restify, "createServer"),
-        fakeServer = { listen: sandbox.stub(), get: sandbox.stub() };
-
-    createStub.returns(fakeServer);
     config.server.port = "4242";
 
     server.launch();
 
     fakeServer.listen.calledOnce.should.be.true;
     fakeServer.listen.firstCall.calledWith(4242).should.be.true;
+  });
+
+  it("routes the GET /githubissues endpoing", function () {
+    server.launch();
 
     fakeServer.get.calledOnce.should.be.true;
     fakeServer.get.firstCall.args[0].should.be.equal("/githubissues");
-    fakeServer.get.firstCall.args[1].should.be.equal(githubissuesHandler);
+    fakeServer.get.firstCall.args[1].should.be.equal(handlerModule.githubissues);
   });
 });
