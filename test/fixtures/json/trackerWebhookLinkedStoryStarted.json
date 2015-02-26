@@ -1,0 +1,51 @@
+{
+  "changes": [
+    {
+      "change_type": "update",
+      "id": 89146028,
+      "kind": "story",
+      "name": "On story-import request from Tracker, makes request to GitHub for issues, reformats result from GH and returns to Tracker in XML",
+      "new_values": {
+        "current_state": "started",
+        "owned_by_id": 707551,
+        "owner_ids": [
+          707551
+        ],
+        "updated_at": "2015-02-26T18:07:13Z"
+      },
+      "original_values": {
+        "current_state": "unstarted",
+        "owned_by_id": null,
+        "owner_ids": [],
+        "updated_at": "2015-02-26T18:07:08Z"
+      },
+      "story_type": "feature"
+    }
+  ],
+  "guid": "1286564_10",
+  "highlight": "started",
+  "kind": "story_update_activity",
+  "message": "Jeff Turley started this feature",
+  "occurred_at": "2015-02-26T18:07:13Z",
+  "performed_by": {
+    "id": 707551,
+    "initials": "JT",
+    "kind": "person",
+    "name": "Jeff Turley"
+  },
+  "primary_resources": [
+    {
+      "id": 89146028,
+      "kind": "story",
+      "name": "On story-import request from Tracker, makes request to GitHub for issues, reformats result from GH and returns to Tracker in XML",
+      "story_type": "feature",
+      "url": "https://www.pivotaltracker.com/story/show/89146028"
+    }
+  ],
+  "project": {
+    "id": 1286564,
+    "kind": "project",
+    "name": "TRIssues"
+  },
+  "project_version": 10
+}
