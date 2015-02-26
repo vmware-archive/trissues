@@ -24,7 +24,8 @@
     "bluebird": "^2.9.6",
     "environmental": "^1.2.0",
     "lodash": "^3.1.0",
-    "restify": "^2.8.5"
+    "restify": "^2.8.5",
+    "xml": "^1.0.0"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
