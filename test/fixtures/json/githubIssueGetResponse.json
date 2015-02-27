@@ -1,0 +1,63 @@
+{
+  "url": "https://api.github.com/repos/pivotaltracker/trissues/issues/2",
+  "labels_url": "https://api.github.com/repos/pivotaltracker/trissues/issues/2/labels{/name}",
+  "comments_url": "https://api.github.com/repos/pivotaltracker/trissues/issues/2/comments",
+  "events_url": "https://api.github.com/repos/pivotaltracker/trissues/issues/2/events",
+  "html_url": "https://github.com/pivotaltracker/trissues/issues/2",
+  "id": 58967898,
+  "number": 2,
+  "title": "On story-import request from Tracker, makes request to GitHub for issues, reformats result from GH and returns to Tracker in XML",
+  "user": {
+    "login": "tracker-common",
+    "id": 4206307,
+    "avatar_url": "https://avatars.githubusercontent.com/u/4206307?v=3",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/tracker-common",
+    "html_url": "https://github.com/tracker-common",
+    "followers_url": "https://api.github.com/users/tracker-common/followers",
+    "following_url": "https://api.github.com/users/tracker-common/following{/other_user}",
+    "gists_url": "https://api.github.com/users/tracker-common/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/tracker-common/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/tracker-common/subscriptions",
+    "organizations_url": "https://api.github.com/users/tracker-common/orgs",
+    "repos_url": "https://api.github.com/users/tracker-common/repos",
+    "events_url": "https://api.github.com/users/tracker-common/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/tracker-common/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "labels": [
+    {
+      "url": "https://api.github.com/repos/octocat/Hello-World/labels/bug",
+      "name": "feature",
+      "color": "f29513"
+    }
+  ],
+  "state": "open",
+  "locked": false,
+  "assignee": {
+    "login": "tracker-common",
+    "id": 4206307,
+    "avatar_url": "https://avatars.githubusercontent.com/u/4206307?v=3",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/tracker-common",
+    "html_url": "https://github.com/tracker-common",
+    "followers_url": "https://api.github.com/users/tracker-common/followers",
+    "following_url": "https://api.github.com/users/tracker-common/following{/other_user}",
+    "gists_url": "https://api.github.com/users/tracker-common/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/tracker-common/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/tracker-common/subscriptions",
+    "organizations_url": "https://api.github.com/users/tracker-common/orgs",
+    "repos_url": "https://api.github.com/users/tracker-common/repos",
+    "events_url": "https://api.github.com/users/tracker-common/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/tracker-common/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2015-02-25T20:53:56Z",
+  "updated_at": "2015-02-25T20:53:56Z",
+  "closed_at": null,
+  "body": "Will need to have unit tests stub out request to GitHub, so need an actual response for test data.\r\n\r\nHow do we want to handle outbound server requests for integration testing?\r\n"
+}

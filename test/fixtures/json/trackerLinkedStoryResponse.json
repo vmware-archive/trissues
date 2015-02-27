@@ -1,0 +1,23 @@
+{
+  "data": {
+    "created_at": "2015-02-25T22:03:27Z",
+    "current_state": "started",
+    "description": "Will need to have unit tests stub out request to GitHub, so need an actual response for test data.\n\nHow do we want to handle outbound server requests for integration testing?\n",
+    "estimate": 1,
+    "external_id": "2",
+    "id": 89146028,
+    "integration_id": 33098,
+    "kind": "story",
+    "labels": [],
+    "name": "On story-import request from Tracker, makes request to GitHub for issues, reformats result from GH and returns to Tracker in XML",
+    "owned_by_id": 707551,
+    "owner_ids": [
+      707551
+    ],
+    "project_id": 1286564,
+    "requested_by_id": 707551,
+    "story_type": "feature",
+    "updated_at": "2015-02-26T18:07:13Z",
+    "url": "https://www.pivotaltracker.com/story/show/89146028"
+  }
+}

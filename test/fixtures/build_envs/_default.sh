@@ -23,7 +23,11 @@
 export NODE_APP_PREFIX="TRISSUES"
 export TRISSUES_SERVER_PORT="8000"
 export TRISSUES_GITHUB_REPO="pivotaltracker/trissues"
+export TRISSUES_EXCLUDE_LABELS="wontfix, invalid"
+
+# export TRISSUES_TRACKER_INTEGRATIONID=33098
 
 export TRISSUES_AUTH_GITHUB=${TRISSUES_AUTH_GITHUB:="fake-test-token"}
+export TRISSUES_AUTH_TRACKER=${TRISSUES_AUTH_TRACKER:="fake-test-token"}
 
 export multi="spec=-"

@@ -24,6 +24,8 @@
     "bluebird": "^2.9.6",
     "environmental": "^1.2.0",
     "lodash": "^3.1.0",
+    "octonode": "^0.6.14",
+    "pivotaltracker": "^0.1.1",
     "restify": "^2.8.5",
     "xml": "^1.0.0"
   },

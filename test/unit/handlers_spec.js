@@ -5,13 +5,13 @@
 var should = require("should"),
     sinon = require("sinon"),
     fs = require("fs"),
-    mitm = require("mitm")(),
+    mitmFactory = require("mitm"),
     parseXml = require("xml2js").parseString,
 
     // code under test
     handlers = rewireInApp("handlers"),
 
-    config, sandbox, res, next;
+    config, sandbox, res, next, mitm;
 
 
 describe("handlers", function () {
@@ -20,9 +20,11 @@ describe("handlers", function () {
     sandbox = sinon.sandbox.create();
     res = { send: sandbox.stub() };
     next = sandbox.stub();
+    mitm = mitmFactory();
   });
   afterEach(function () {
     sandbox.restore();
+    mitm.disable();
   });
 
   describe("githubissues", function () {
@@ -103,7 +105,10 @@ describe("handlers", function () {
     });
 
     function loadJsonFixture(name) {
-      return JSON.parse(fs.readFileSync(__dirname+"/../fixtures/json/" + name + ".json", { encoding: "utf8" }));
+      return JSON.parse(loadJsonFile(name));
+    }
+    function loadJsonFile(name) {
+      return fs.readFileSync(__dirname+"/../fixtures/json/" + name + ".json", { encoding: "utf8" });
     }
 
     it("accepts but ignores activity we don't care about", function () {
@@ -111,26 +116,51 @@ describe("handlers", function () {
       handlers.fromtracker(req, res, next);
     });
 
-    // it("sends label updates to GH when linked story in Tracker changes state", function (done) {
-    //   var req = { body: loadJsonFixture("trackerWebhookLinkedStoryStarted") },
-    //       githubResponse = loadJsonFixture("githubLabelUpdateResponse");
-    //
-    //   mitm.on("request", function(req, res) {
-    //     req.method.should.equal("SOMETHING");
-    //     req.url.should.equal("/repos/pivotaltracker/trissues/FIXME");
-    //     throw "also assert thebo"
-    //     res.statusCode = 200;
-    //     res.end(githubResponse);
-    //   });
-    //
-    //   next = function () {
-    //     res.send.calledOnce.should.be.true;
-    //     res.send.firstCall.args[0].should.equal(200);
-    //
-    //     done();
-    //   };
-    //   handlers.fromtracker(req, res, next);
-    // });
+    it("sends label updates to GH when linked story in Tracker changes state", function (done) {
+      var req = { body: loadJsonFixture("trackerWebhookLinkedStoryStarted") },
+          trackerStoryResponse = loadJsonFile("trackerLinkedStoryResponse"),
+          issueGetResponse = loadJsonFile("githubIssueGetResponse"),
+          projectId = 1286564,
+          storyId = 89146028,
+          issueNumber = 2;
+
+      config.tracker = { integrationid: 33098 };
+
+console.log("configure mitm");
+      mitm.on("request", function(req, res) {
+console.log(req.method + " " + req.url);
+        res.statusCode = 200;
+        if (req.method === "GET") {
+console.log(req.url);
+          if (req.url === "/services/v5/projects/" + projectId + "/stories/" + storyId + "?envelope=true") {
+            res.end(trackerStoryResponse);
+          }
+          else if (req.url === "/repos/pivotaltracker/trissues/issues/" + issueNumber) {
+            res.end(issueGetResponse);
+          }
+          else {
+            ("My responses are limited.").should.equal(null);
+          }
+        }
+        else if (req.method === "PATCH") {
+          req.url.should.equal("/repos/pivotaltracker/trissues/issues/" + issueNumber);
+          var responseObj = JSON.parse(issueGetResponse);
+          // do some things to the model
+          res.end(JSON.stringify(responseObj));
+        }
+        else {
+          ("Should not be receiving a "+req.method+" request").should.equal(null);
+        }
+      });
+
+      next = sandbox.spy(function () {
+        res.send.calledOnce.should.be.true;
+        res.send.firstCall.args[0].should.equal(200);
+
+        done();
+      });
+      handlers.fromtracker(req, res, next);
+    });
 
     // it("doesn't contact GH on unlinked story state changes", function () {
     //

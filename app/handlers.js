@@ -1,6 +1,13 @@
 var restify = require("restify"),
-config = require("environmental").config(),
-xml = require("xml");
+    config = require("environmental").config(),
+    xml = require("xml"),
+    octonode = require("octonode"),
+    tracker = new require("pivotaltracker").Client(config.auth.tracker);
+
+function finishRequest(res, next) {
+  res.send(200);
+  return next();
+}
 
 module.exports = {
   githubissues: function (req, res, next) {
@@ -52,8 +59,41 @@ module.exports = {
     });
   },
   fromtracker: function (req, res, next) {
-//console.log(req.body);
-    res.send(200);
-    return next();
+    var activity = req.body;
+    activity.changes.forEach(function (changeHash) {
+      if (changeHash.kind === "story") {
+console.log("Have a changed story");
+        var projectId = activity.project.id,
+        storyId = changeHash.id;
+        tracker.project(projectId).story(storyId).get(function (error, story) {
+console.log(story.integration_id, config.tracker.integrationid);
+console.log(story.integration_id === config.tracker.integrationid);
+if (story.integration_id === config.tracker.integrationid) {
+console.log("integration_id matches");
+            var github = octonode.client(config.auth.github),
+            issue = github.issue(config.github.repo, story.external_id);
+
+            issue.info(function (err, issueHash) {
+console.log("ISSUE HASH!");
+console.log(issueHash);
+              var labelToAdd = changeHash.new_values.current_state,
+              labelToRemove = changeHash.original_values.current_state,
+              newLabelNames = [],
+              labelNames = issueHash.labels.map(function (labelObj) { return labelObj.name; });
+              newLabelNames = labelNames.filter(function (label) { return label !== labelToRemove; });
+              newLabelNames.push(labelToAdd);
+
+console.log("update with: ", newLabelNames);
+              issue.update({ labels: newLabelNames }, function () {
+console.log("UPDATED!");
+                finishRequest(res, next);
+              });
+            });
+          }
+        });
+      }
+    });
+
+    finishRequest(res, next);
   }
 };
