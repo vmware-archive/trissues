@@ -124,7 +124,7 @@ describe("handlers", function () {
           storyId = 89146028,
           issueNumber = 2;
 
-      config.tracker = { integrationid: 33098 };
+      config.tracker = { integrationid: "33098" };
 
       mitm.on("request", function (req, res) {
         res.statusCode = 200;
@@ -134,7 +134,8 @@ describe("handlers", function () {
           } else if (req.url === "/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token") {
             res.end(issueGetResponse);
           } else {
-            ("My responses are limited.").should.equal(null);
+
+            ("Unexpected url requested: " + req.url).should.equal(null);
           }
         } else if (req.method === "POST") {    // simulated PATCH
           req.url.should.equal("/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token");

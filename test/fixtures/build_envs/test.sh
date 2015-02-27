@@ -5,4 +5,6 @@ source ${__DIR}/development.sh
 
 export DEPLOY_ENV="$(basename "${BASH_SOURCE[0]}" .sh)"
 export NODE_ENV="test"
-#export DEBUG=*:*
+
+export TRISSUES_AUTH_GITHUB="fake-test-token"
+export TRISSUES_AUTH_TRACKER="fake-test-token"

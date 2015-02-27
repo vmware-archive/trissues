@@ -23,7 +23,7 @@
 export NODE_APP_PREFIX="TRISSUES"
 export TRISSUES_SERVER_PORT="8000"
 export TRISSUES_GITHUB_REPO="pivotaltracker/trissues"
-export TRISSUES_EXCLUDE_LABELS="wontfix, invalid"
+export TRISSUES_EXCLUDE_LABELS="wontfix, invalid, duplicate"
 
 # export TRISSUES_TRACKER_INTEGRATIONID=33098
 

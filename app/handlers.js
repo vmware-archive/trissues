@@ -1,13 +1,11 @@
 var restify = require("restify"),
-    Promise = require("bluebird"),
     config = require("environmental").config(),
     xml = require("xml"),
-    Client = require("pivotaltracker").Client,
-    tracker = new Client(config.auth.tracker),
     fromTracker = require("./fromTracker");
 
 module.exports = {
   githubissues: function (req, res, next) {
+    console.log("GET request for importable stories through /githubissues");
     var client = restify.createJsonClient({
       url: "https://api.github.com/",
       headers: {
@@ -22,6 +20,8 @@ module.exports = {
       }
     }());
     client.get("/repos/" + config.github.repo + "/issues", function (err, githubReq, githubRes, issues) {
+      console.log("    Received " + issues.length + " issues from GitHub");
+
       var responseObj = {
         external_stories: [{ _attr: { type: "array" } }]
       };
@@ -52,16 +52,22 @@ module.exports = {
 
       res.contentType = "application/xml";
       res.send(200, xml(responseObj, { declaration: true }));
+      console.log("    Responding with " + responseObj.external_stories.length + " Tracker external stories");
       return next();
     });
   },
 
   fromtracker: function (req, res, next) {
+    console.log("POST request to /fromtracker");
+
     var promises = [],
         activity = req.body;
     fromTracker.setConfig(config);
+
+    console.log("    Tracker activity item contains " + activity.changes.length + " resource changes");
     activity.changes.forEach(function (changeHash) {
       if (fromTracker.isStoryWithStateChange(promises, changeHash)) {
+        console.log("   state change to story " + changeHash.id);
         fromTracker.updateStateLabelsInGitHub(promises, activity, changeHash);
       }
     });

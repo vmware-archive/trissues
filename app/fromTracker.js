@@ -9,7 +9,10 @@ var fromTracker,
 fromTracker = {
   setConfig: function (initialConfig) {
     config = initialConfig;
-    tracker = new Client(config.auth.tracker);
+    tracker = new Client({
+      trackerToken: config.auth.tracker,
+      pivotalHost: config.tracker.host || "www.pivotaltracker.com"
+    });
     fromTracker.initialConfig = initialConfig;
   },
 
@@ -30,7 +33,11 @@ fromTracker = {
     promises.push(promise);
     promise.
         then(function(story) {
-          if (story.integrationId === config.tracker.integrationid) {
+          console.log("    Story integration id: " + story.integrationId + " configured integration id: " + config.tracker.integrationid);
+
+          if (story.integrationId === parseInt(config.tracker.integrationid)) {
+            console.log("    story's integrationId matches our configuration");
+
             var github = octonode.client(config.auth.github);
             issue = github.issue(config.github.repo, story.externalId);
 
@@ -42,6 +49,7 @@ fromTracker = {
           return Promise.reject("Operation unneeded");
         }).
         then(function(issues) {
+          console.log("   Matching GitHub issue received");
           var issueHash = issues[0],
               labelToAdd = changeHash.new_values.current_state,
               labelToRemove = changeHash.original_values.current_state,
@@ -53,7 +61,9 @@ fromTracker = {
               });
           newLabelNames.push(labelToAdd);
 
-          issue.update({labels: newLabelNames}, function() {
+          console.log("    original Issue lables were " + labelNames + ", changing to " + newLabelNames);
+          issue.update({labels: newLabelNames}, function(error) {
+            console.log("    uptade to GitHub " + (error === null ? "succeeded" : "failed"));
           });
         });
   },
@@ -64,6 +74,7 @@ fromTracker = {
       promises.push(Promise.resolve());
     }
     Promise.settle(promises).then(function() {
+      console.log("    sending resonse with status 200");
       res.send(200);
       return next();
     });
