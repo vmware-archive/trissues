@@ -126,29 +126,22 @@ describe("handlers", function () {
 
       config.tracker = { integrationid: 33098 };
 
-console.log("configure mitm");
-      mitm.on("request", function(req, res) {
-console.log(req.method + " " + req.url);
+      mitm.on("request", function (req, res) {
         res.statusCode = 200;
         if (req.method === "GET") {
-console.log(req.url);
           if (req.url === "/services/v5/projects/" + projectId + "/stories/" + storyId + "?envelope=true") {
             res.end(trackerStoryResponse);
-          }
-          else if (req.url === "/repos/pivotaltracker/trissues/issues/" + issueNumber) {
+          } else if (req.url === "/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token") {
             res.end(issueGetResponse);
-          }
-          else {
+          } else {
             ("My responses are limited.").should.equal(null);
           }
-        }
-        else if (req.method === "PATCH") {
-          req.url.should.equal("/repos/pivotaltracker/trissues/issues/" + issueNumber);
+        } else if (req.method === "POST") {    // simulated PATCH
+          req.url.should.equal("/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token");
           var responseObj = JSON.parse(issueGetResponse);
           // do some things to the model
           res.end(JSON.stringify(responseObj));
-        }
-        else {
+        } else {
           ("Should not be receiving a "+req.method+" request").should.equal(null);
         }
       });

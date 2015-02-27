@@ -37,13 +37,12 @@ describe("GitHub Issues public API", function () {
       if (labelNames.indexOf("started") === -1) {
         newLabelNames = labelNames.filter(function (label) { return label !== "unstarted"; });
         newLabelNames.push("started");
-      }
-      else {
+      } else {
         newLabelNames = labelNames.filter(function (label) { return label !== "started"; });
         newLabelNames.push("unstarted");
       }
 
-      issue.update({labels: newLabelNames}, function () {
+      issue.update({ labels: newLabelNames }, function () {
         done();
       });
     });
