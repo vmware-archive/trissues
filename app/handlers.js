@@ -1,14 +1,10 @@
 var restify = require("restify"),
+    Promise = require("bluebird"),
     config = require("environmental").config(),
     xml = require("xml"),
-    octonode = require("octonode"),
     Client = require("pivotaltracker").Client,
-    tracker = new Client(config.auth.tracker);
-
-function finishRequest(res, next) {
-  res.send(200);
-  return next();
-}
+    tracker = new Client(config.auth.tracker),
+    fromTracker = require("./fromTracker");
 
 module.exports = {
   githubissues: function (req, res, next) {
@@ -59,42 +55,17 @@ module.exports = {
       return next();
     });
   },
+
   fromtracker: function (req, res, next) {
-    var startedDeferredWork = false,
+    var promises = [],
         activity = req.body;
-
+    fromTracker.setConfig(config);
     activity.changes.forEach(function (changeHash) {
-      if (changeHash.kind === "story" &&
-          (changeHash.new_values.current_state || changeHash.original_values.current_state)) {
-        var projectId = activity.project.id,
-        storyId = changeHash.id;
-
-        startedDeferredWork = true;
-        tracker.project(projectId).story(storyId).get(function (error, story) {
-          if (story.integrationId === config.tracker.integrationid) {
-            var github = octonode.client(config.auth.github),
-            issue = github.issue(config.github.repo, story.externalId);
-
-            issue.info(function (err, issueHash) {
-              var labelToAdd = changeHash.new_values.current_state,
-                  labelToRemove = changeHash.original_values.current_state,
-                  labelNames = issueHash.labels.map(function (labelObj) { return labelObj.name; }),
-                  newLabelNames = labelNames.filter(function (label) { return label !== labelToRemove; });
-              newLabelNames.push(labelToAdd);
-
-              issue.update({ labels: newLabelNames }, function () {
-                finishRequest(res, next);
-              });
-            });
-          } else {
-            finishRequest(res, next);
-          }
-        });
+      if (fromTracker.isStoryWithStateChange(promises, changeHash)) {
+        fromTracker.updateStateLabelsInGitHub(promises, activity, changeHash);
       }
     });
 
-    if (!startedDeferredWork) {
-      finishRequest(res, next);
-    }
+    fromTracker.finishRequest(promises, res, next);
   }
 };
