@@ -1,4 +1,4 @@
-/*globals describe, it, beforeEach, afterEach, rewireInApp */
+/*globals describe, it, beforeEach, afterEach, rewireInApp, loadJsonFixture, loadJsonFile */
 /*jshint expr:true*/
 
 
@@ -8,7 +8,7 @@ var should = require("should"),
     mitmFactory = require("mitm"),
     parseXml = require("xml2js").parseString,
 
-    // code under test
+// code under test
     handlers = rewireInApp("handlers"),
 
     config, sandbox, res, next, mitm;
@@ -28,8 +28,8 @@ describe("handlers", function () {
   });
 
   describe("githubissues", function () {
-    var jsonResponse = fs.readFileSync(__dirname+"/../fixtures/json/githubIssuesResponse.json", { encoding: "utf8" }),
-        xmlResponse = fs.readFileSync(__dirname+"/../fixtures/xml/fixtureResponse.xml", { encoding: "utf8" });
+    var jsonResponse = fs.readFileSync(__dirname + "/../fixtures/json/githubIssuesResponse.json", { encoding: "utf8" }),
+        xmlResponse = fs.readFileSync(__dirname + "/../fixtures/xml/fixtureResponse.xml", { encoding: "utf8" });
 
     it("returns fixture stories", function (done) {
       mitm.on("request", function (req, res) {
@@ -80,7 +80,9 @@ describe("handlers", function () {
 
       it("can filter out specified label", function (done) {
         config.exclude = { labels: "feature" };
-        getIssues(res, done, function () { gotIssues([1]); });
+        getIssues(res, done, function () {
+          gotIssues([1]);
+        });
       });
 
       it("can filter out multiple specified labels", function (done) {
@@ -103,13 +105,6 @@ describe("handlers", function () {
       res.send.calledOnce.should.be.true;
       res.send.firstCall.args[0].should.equal(200);
     });
-
-    function loadJsonFixture(name) {
-      return JSON.parse(loadJsonFile(name));
-    }
-    function loadJsonFile(name) {
-      return fs.readFileSync(__dirname+"/../fixtures/json/" + name + ".json", { encoding: "utf8" });
-    }
 
     it("accepts but ignores activity we don't care about", function () {
       var req = { body: loadJsonFixture("trackerWebhookTaskEdit") };
@@ -134,16 +129,14 @@ describe("handlers", function () {
           } else if (req.url === "/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token") {
             res.end(issueGetResponse);
           } else {
-
             ("Unexpected url requested: " + req.url).should.equal(null);
           }
         } else if (req.method === "POST") {    // simulated PATCH
           req.url.should.equal("/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token");
           var responseObj = JSON.parse(issueGetResponse);
-          // do some things to the model
-          res.end(JSON.stringify(responseObj));
+          res.end(JSON.stringify(responseObj));   // send back unmodified resource, OK because code never looks at content
         } else {
-          ("Should not be receiving a "+req.method+" request").should.equal(null);
+          ("Should not be receiving a " + req.method + " request").should.equal(null);
         }
       });
 
@@ -155,9 +148,35 @@ describe("handlers", function () {
       });
       handlers.fromtracker(req, res, next);
     });
+  });
 
-    // it("doesn't contact GH on unlinked story state changes", function () {
-    //
-    // });
+  describe("fromgithub", function () {
+    var fromGitHub, isIssueStub, updateStoryStub, next,
+        req = { body: loadJsonFixture("githubWebhookLabelRemove") },
+        res = {};
+
+    beforeEach(function () {
+      fromGitHub = handlers.__get__("fromGitHub");
+      isIssueStub = sandbox.stub(fromGitHub, "isIssueWithLabelChange");
+      updateStoryStub = sandbox.stub(fromGitHub, "updateStoryLabelsInTracker");
+      next = sandbox.stub();
+    });
+
+    afterEach(function () {
+      isIssueStub.calledOnce.should.be.true;
+      next.calledOnce.should.be.true;
+    });
+
+    it("ignores GH webhook POSTs that don't indicate label changes on an Issue", function () {
+      isIssueStub.returns(false);
+      handlers.fromgithub(req, res, next);
+      updateStoryStub.called.should.be.false;
+    });
+
+    it("calls the method to update labels in Tracker if the webhook POST is a label change", function () {
+      isIssueStub.returns(true);
+      handlers.fromgithub(req, res, next);
+      updateStoryStub.called.should.be.true;
+    });
   });
 });

@@ -1,6 +1,7 @@
 var restify = require("restify"),
     config = require("environmental").config(),
     xml = require("xml"),
+    fromGitHub = require("./fromGitHub"),
     fromTracker = require("./fromTracker");
 
 module.exports = {
@@ -55,6 +56,20 @@ module.exports = {
       console.log("    Responding with " + responseObj.external_stories.length + " Tracker external stories");
       return next();
     });
+  },
+
+  fromgithub: function (req, res, next) {
+    console.log("POST request to /fromgithub");
+
+    var promises = [],
+        webhook = req.body;
+    fromGitHub.setConfig(config);
+
+    console.log("    GitHub webhook is for the activity '" + (webhook && webhook.activity) + "'");
+    if (fromGitHub.isIssueWithLabelChange(promises, webhook)) {
+      fromGitHub.updateStoryLabelsInTracker(promises, webhook);
+    }
+    return next();
   },
 
   fromtracker: function (req, res, next) {

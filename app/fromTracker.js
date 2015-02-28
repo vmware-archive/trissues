@@ -11,9 +11,8 @@ fromTracker = {
     config = initialConfig;
     tracker = new Client({
       trackerToken: config.auth.tracker,
-      pivotalHost: config.tracker.host || "www.pivotaltracker.com"
+      pivotalHost: (config.tracker && config.tracker.host) || "www.pivotaltracker.com"
     });
-    fromTracker.initialConfig = initialConfig;
   },
 
   isStoryWithStateChange: function (promises, changeHash) {
@@ -23,16 +22,15 @@ fromTracker = {
 
   updateStateLabelsInGitHub: function (promises, activity, changeHash) {
     var projectId = activity.project.id,
-        storyId = changeHash.id;
-
-    var qualifiedStory = tracker.project(projectId).story(storyId),
+        storyId = changeHash.id,
+        qualifiedStory = tracker.project(projectId).story(storyId),
         getter = Promise.promisify(qualifiedStory.get, qualifiedStory),
         promise = getter(),
         issue;
 
     promises.push(promise);
     promise.
-        then(function(story) {
+        then(function (story) {
           console.log("    Story integration id: " + story.integrationId + " configured integration id: " + config.tracker.integrationid);
 
           if (story.integrationId === parseInt(config.tracker.integrationid)) {
@@ -48,32 +46,32 @@ fromTracker = {
           }
           return Promise.reject("Operation unneeded");
         }).
-        then(function(issues) {
+        then(function (issues) {
           console.log("   Matching GitHub issue received");
           var issueHash = issues[0],
               labelToAdd = changeHash.new_values.current_state,
               labelToRemove = changeHash.original_values.current_state,
-              labelNames = issueHash.labels.map(function(labelObj) {
+              labelNames = issueHash.labels.map(function (labelObj) {
                 return labelObj.name;
               }),
-              newLabelNames = labelNames.filter(function(label) {
+              newLabelNames = labelNames.filter(function (label) {
                 return label !== labelToRemove;
               });
           newLabelNames.push(labelToAdd);
 
           console.log("    original Issue lables were " + labelNames + ", changing to " + newLabelNames);
-          issue.update({labels: newLabelNames}, function(error) {
+          issue.update({ labels: newLabelNames }, function (error) {
             console.log("    uptade to GitHub " + (error === null ? "succeeded" : "failed"));
           });
         });
   },
 
 
-  finishRequest: function(promises, res, next) {
+  finishRequest: function (promises, res, next) {
     if (promises.length === 0) {
       promises.push(Promise.resolve());
     }
-    Promise.settle(promises).then(function() {
+    Promise.settle(promises).then(function () {
       console.log("    sending resonse with status 200");
       res.send(200);
       return next();
