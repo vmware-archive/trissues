@@ -2,6 +2,7 @@ var fromTracker,
     Promise = require("bluebird"),
     octonode = require("octonode"),
     Client = require("pivotaltracker").Client,
+    helpers = require("./helpers"),
     tracker,
     config;
 
@@ -31,10 +32,10 @@ fromTracker = {
     promises.push(promise);
     promise.
         then(function (story) {
-          console.log("    Story integration id: " + story.integrationId + " configured integration id: " + config.tracker.integrationid);
+          helpers.log("    Story integration id: " + story.integrationId + " configured integration id: " + config.tracker.integrationid);
 
           if (story.integrationId === parseInt(config.tracker.integrationid)) {
-            console.log("    story's integrationId matches our configuration");
+            helpers.log("    story's integrationId matches our configuration");
 
             var github = octonode.client(config.auth.github);
             issue = github.issue(config.github.repo, story.externalId);
@@ -47,7 +48,7 @@ fromTracker = {
           return Promise.reject("Operation unneeded");
         }).
         then(function (issues) {
-          console.log("   Matching GitHub issue received");
+          helpers.log("   Matching GitHub issue received");
           var issueHash = issues[0],
               labelToAdd = changeHash.new_values.current_state,
               labelToRemove = changeHash.original_values.current_state,
@@ -59,9 +60,9 @@ fromTracker = {
               });
           newLabelNames.push(labelToAdd);
 
-          console.log("    original Issue lables were " + labelNames + ", changing to " + newLabelNames);
+          helpers.log("    original Issue lables were " + labelNames + ", changing to " + newLabelNames);
           issue.update({ labels: newLabelNames }, function (error) {
-            console.log("    uptade to GitHub " + (error === null ? "succeeded" : "failed"));
+            helpers.log("    uptade to GitHub " + (error === null ? "succeeded" : "failed"));
           });
         });
   },
@@ -72,7 +73,7 @@ fromTracker = {
       promises.push(Promise.resolve());
     }
     Promise.settle(promises).then(function () {
-      console.log("    sending resonse with status 200");
+      helpers.log("    sending resonse with status 200");
       res.send(200);
       return next();
     });

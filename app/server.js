@@ -1,5 +1,6 @@
 var config = require("environmental").config(),
     restify = require("restify"),
+    helpers = require("./helpers"),
     handlers = require("./handlers");
 
 function launch() {
@@ -18,7 +19,7 @@ function launch() {
   server.get("/githubissues", handlers.githubissues);
   server.post("/fromtracker", handlers.fromtracker);
   server.listen(parseInt(port));
-  console.log("Server running at http://127.0.0.1:" + port + "/  (" + process.env.NODE_ENV + " mode)");
+  helpers.log("Server running at http://127.0.0.1:" + port + "/  (" + process.env.NODE_ENV + " mode)");
 }
 
 module.exports = { launch: launch };

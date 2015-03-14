@@ -1,12 +1,13 @@
 var restify = require("restify"),
     config = require("environmental").config(),
     xml = require("xml"),
+    helpers = require("./helpers"),
     fromGitHub = require("./fromGitHub"),
     fromTracker = require("./fromTracker");
 
 module.exports = {
   githubissues: function (req, res, next) {
-    console.log("GET request for importable stories through /githubissues");
+    helpers.log("GET request for importable stories through /githubissues");
     var client = restify.createJsonClient({
       url: "https://api.github.com/",
       headers: {
@@ -21,7 +22,7 @@ module.exports = {
       }
     }());
     client.get("/repos/" + config.github.repo + "/issues", function (err, githubReq, githubRes, issues) {
-      console.log("    Received " + issues.length + " issues from GitHub");
+      helpers.log("    Received " + issues.length + " issues from GitHub");
 
       var responseObj = {
         external_stories: [{ _attr: { type: "array" } }]
@@ -53,19 +54,19 @@ module.exports = {
 
       res.contentType = "application/xml";
       res.send(200, xml(responseObj, { declaration: true }));
-      console.log("    Responding with " + responseObj.external_stories.length + " Tracker external stories");
+      helpers.log("    Responding with " + responseObj.external_stories.length + " Tracker external stories");
       return next();
     });
   },
 
   fromgithub: function (req, res, next) {
-    console.log("POST request to /fromgithub");
+    helpers.log("POST request to /fromgithub");
 
     var promises = [],
         webhook = req.body;
     fromGitHub.setConfig(config);
 
-    console.log("    GitHub webhook is for the activity '" + (webhook && webhook.activity) + "'");
+    helpers.log("    GitHub webhook is for the activity '" + (webhook && webhook.activity) + "'");
     if (fromGitHub.isIssueWithLabelChange(promises, webhook)) {
       fromGitHub.updateStoryLabelsInTracker(promises, webhook);
     }
@@ -73,16 +74,16 @@ module.exports = {
   },
 
   fromtracker: function (req, res, next) {
-    console.log("POST request to /fromtracker");
+    helpers.log("POST request to /fromtracker");
 
     var promises = [],
         activity = req.body;
     fromTracker.setConfig(config);
 
-    console.log("    Tracker activity item contains " + activity.changes.length + " resource changes");
+    helpers.log("    Tracker activity item contains " + activity.changes.length + " resource changes");
     activity.changes.forEach(function (changeHash) {
       if (fromTracker.isStoryWithStateChange(promises, changeHash)) {
-        console.log("   state change to story " + changeHash.id);
+        helpers.log("   state change to story " + changeHash.id);
         fromTracker.updateStateLabelsInGitHub(promises, activity, changeHash);
       }
     });

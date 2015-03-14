@@ -7,6 +7,7 @@ var should = require("should"),
     fs = require("fs"),
     mitmFactory = require("mitm"),
     parseXml = require("xml2js").parseString,
+    helpers = require("./test_helpers.js"),
 
 // code under test
     handlers = rewireInApp("handlers"),
@@ -16,6 +17,8 @@ var should = require("should"),
 
 describe("handlers", function () {
   beforeEach(function () {
+    helpers.stubLogging(handlers);
+
     config = handlers.__get__("config");
     sandbox = sinon.sandbox.create();
     res = { send: sandbox.stub() };
