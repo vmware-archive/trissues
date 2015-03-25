@@ -25,6 +25,7 @@ describe("fromGitHub", function () {
     });
 
     it("returns false for webhooks with non-label actions", function () {
+      fromGitHub.isIssueWithLabelChange([], loadJsonFixture("githubWebhookIssueClosed")).should.be.false;
     });
   });
 
@@ -45,7 +46,9 @@ describe("fromGitHub", function () {
       mitm.on("request", function (req, res) {
         res.statusCode = 200;
         if (req.method === "GET") {
-          if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A1&envelope=true") {
+          if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A2&envelope=true") {
+            console.log("HEllo from MITM land!");
+            console.log(trackerSearchLinkedStory);
             res.end(trackerSearchLinkedStory);
           } else {
             ("Unexpected url requested: " + req.url).should.equal(null);
@@ -63,6 +66,7 @@ describe("fromGitHub", function () {
       fromGitHub.updateStoryLabelsInTracker(promises, loadJsonFixture("githubWebhookLabelAdd"));
       promises[0].
           then(function () {
+            console.log(arguments);
           });
     });
   });

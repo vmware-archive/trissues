@@ -7,7 +7,7 @@
     "events_url": "https://api.github.com/repos/pivotaltracker/trissues/issues/1/events",
     "html_url": "https://github.com/pivotaltracker/trissues/issues/1",
     "id": 58966340,
-    "number": 1,
+    "number": 2,
     "title": "Server responds to GET requests for story imports from Tracker",
     "user": {
       "login": "tracker-common",
