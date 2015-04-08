@@ -70,7 +70,7 @@ module.exports = {
     if (fromGitHub.isIssueWithLabelChange(promises, webhook)) {
       fromGitHub.updateStoryLabelsInTracker(promises, webhook);
     }
-    return next();
+    fromGitHub.finishRequest(promises, res, next);
   },
 
   fromtracker: function (req, res, next) {

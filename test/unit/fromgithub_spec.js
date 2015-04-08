@@ -41,23 +41,26 @@ describe("fromGitHub", function () {
 
     it("Updates tracker if necessary", function () {
       var promises = [],
-          trackerSearchLinkedStory = loadJsonFile("trackerSearchLinkedStory");
+          trackerSearchLinkedStory = loadJsonFile("trackerSearchLinkedStory"),
+          storyId = 2208,
+          putLables = null;
 
       mitm.on("request", function (req, res) {
         res.statusCode = 200;
         if (req.method === "GET") {
           if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A2&envelope=true") {
             console.log("HEllo from MITM land!");
-            console.log(trackerSearchLinkedStory);
             res.end(trackerSearchLinkedStory);
           } else {
             ("Unexpected url requested: " + req.url).should.equal(null);
           }
-        //} else if (req.method === "POST") {    // simulated PATCH
-        //  req.url.should.equal("/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token");
-        //  var responseObj = JSON.parse(issueGetResponse);
-        //  do some things to the model
-          //res.end(JSON.stringify(responseObj));
+        } else if (req.method === "PUT") {
+          req.url.should.equal("/services/v5/projects/" + projectId + "/stories/" + storyId);
+          var responseObj = {it: "worked"};
+          putLabels = req.body;
+          console.log(req.body);
+
+          res.end(JSON.stringify(responseObj));
         } else {
           ("Should not be receiving a "+req.method+" request").should.equal(null);
         }
@@ -66,8 +69,9 @@ describe("fromGitHub", function () {
       fromGitHub.updateStoryLabelsInTracker(promises, loadJsonFixture("githubWebhookLabelAdd"));
       promises[0].
           then(function () {
-            console.log(arguments);
+            // console.log(arguments);
           });
+      putLables.should.equal("fred");
     });
   });
 });

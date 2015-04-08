@@ -8,7 +8,7 @@ $ curl -i -u username -d '{"scopes":["repo"]}' https://api.github.com/authorizat
 ## Deploy to run.pivotal.io
 Of course, it will also run fine on any Node server where Github and Pivotal Tracker webhooks can POST.
 ```sh
-$ cf login -a api.run.pivotal.io
+$ cf login -a https://api.run.pivotal.io
 $ cf push trissues --no-start #Doesn't restart cleanly.
 ```
 

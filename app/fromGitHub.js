@@ -24,6 +24,23 @@ fromGitHub = {
         promise = searcher("external_id:"+issueId);
 
     promises.push(promise);
+    promise.then(function(result) {
+      // {epics:[], stories:[Object]}
+      console.log("Label from webhook: ", webhook.label.name);
+      console.log(result.stories[0].labels);
+      // { labels: [{name: 'new name'}]}
+    });
+  },
+
+  finishRequest: function (promises, res, next) {
+    if (promises.length === 0) {
+      promises.push(Promise.resolve());
+    }
+    Promise.settle(promises).then(function () {
+      // helpers.log("    sending response with status 200");
+      res.send(200);
+      return next();
+    });
   }
 };
 

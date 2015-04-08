@@ -155,14 +155,12 @@ describe("handlers", function () {
 
   describe("fromgithub", function () {
     var fromGitHub, isIssueStub, updateStoryStub, next,
-        req = { body: loadJsonFixture("githubWebhookLabelRemove") },
-        res = {};
+        req = { body: loadJsonFixture("githubWebhookLabelRemove") };
 
     beforeEach(function () {
       fromGitHub = handlers.__get__("fromGitHub");
       isIssueStub = sandbox.stub(fromGitHub, "isIssueWithLabelChange");
       updateStoryStub = sandbox.stub(fromGitHub, "updateStoryLabelsInTracker");
-      next = sandbox.stub();
     });
 
     afterEach(function () {
@@ -170,14 +168,26 @@ describe("handlers", function () {
       next.calledOnce.should.be.true;
     });
 
-    it("ignores GH webhook POSTs that don't indicate label changes on an Issue", function () {
+    it("ignores GH webhook POSTs that don't indicate label changes on an Issue", function (done) {
       isIssueStub.returns(false);
+      next = sandbox.spy(function () {
+        res.send.calledOnce.should.be.true;
+        res.send.firstCall.args[0].should.equal(200);
+
+        done();
+      });
       handlers.fromgithub(req, res, next);
       updateStoryStub.called.should.be.false;
     });
 
-    it("calls the method to update labels in Tracker if the webhook POST is a label change", function () {
+    it("calls the method to update labels in Tracker if the webhook POST is a label change", function (done) {
       isIssueStub.returns(true);
+      next = sandbox.spy(function () {
+        res.send.calledOnce.should.be.true;
+        res.send.firstCall.args[0].should.equal(200);
+
+        done();
+      });
       handlers.fromgithub(req, res, next);
       updateStoryStub.called.should.be.true;
     });
