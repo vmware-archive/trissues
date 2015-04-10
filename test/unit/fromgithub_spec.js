@@ -12,8 +12,7 @@ var mitmFactory = require("mitm"),
     fromGitHub = rewireInApp("fromGitHub");
 
 describe("fromGitHub", function () {
-
-  var emptyPromise = function () {
+  function emptyPromise() {
     var promiseResolver,
         promiseRejecter,
         promise = new Promise(function (resolver, rejecter) {
@@ -30,7 +29,7 @@ describe("fromGitHub", function () {
     };
 
     return promise;
-  };
+  }
 
   beforeEach(function () {
     fromGitHub.setConfig(config);
@@ -77,12 +76,12 @@ describe("fromGitHub", function () {
           var accumulator = "",
               promise = emptyPromise();
           req.on("end", function () { promise.resolve(accumulator); });
-          req.on('data', function(chunk) {
-              accumulator += chunk.toString();
+          req.on("data", function (chunk) {
+            accumulator += chunk.toString();
           });
 
           promise.then(function (body) {
-            JSON.parse(body).should.eql({ labels: [{ id: 1234, name: "already there"}, { name: "help wanted" }] });
+            JSON.parse(body).should.eql({ labels: [{ id: 1234, name: "already there" }, { name: "help wanted" }] });
             var responseObj = { it: "worked" };
             res.end(JSON.stringify(responseObj));
           });
