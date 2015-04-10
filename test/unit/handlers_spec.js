@@ -155,7 +155,8 @@ describe("handlers", function () {
 
   describe("fromgithub", function () {
     var fromGitHub, isIssueStub, updateStoryStub, next,
-        req = { body: loadJsonFixture("githubWebhookLabelRemove") };
+        webhookHash = loadJsonFixture("githubWebhookLabelRemove"),
+        req = { body: webhookHash };
 
     beforeEach(function () {
       fromGitHub = handlers.__get__("fromGitHub");
@@ -190,6 +191,7 @@ describe("handlers", function () {
       });
       handlers.fromgithub(req, res, next);
       updateStoryStub.called.should.be.true;
+      updateStoryStub.firstCall.args[0].should.equal(webhookHash);
     });
   });
 });

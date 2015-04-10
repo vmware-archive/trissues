@@ -67,8 +67,14 @@ describe("top-level server", function () {
   it("routes the POST /fromtracker endpoint", function () {
     server.launch();
 
-    fakeServer.post.calledOnce.should.be.true;
     fakeServer.post.firstCall.args[0].should.be.equal("/fromtracker");
     fakeServer.post.firstCall.args[1].should.be.equal(handlerModule.fromtracker);
+  });
+
+  it("routes the POST /fromgithub endpoint", function () {
+    server.launch();
+
+    fakeServer.post.secondCall.args[0].should.be.equal("/fromgithub");
+    fakeServer.post.secondCall.args[1].should.be.equal(handlerModule.fromgithub);
   });
 });

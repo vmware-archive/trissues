@@ -18,6 +18,7 @@ function launch() {
   server.use(restify.bodyParser());
   server.get("/githubissues", handlers.githubissues);
   server.post("/fromtracker", handlers.fromtracker);
+  server.post("/fromgithub", handlers.fromgithub);
   server.listen(parseInt(port));
   helpers.log("Server running at http://127.0.0.1:" + port + "/  (" + process.env.NODE_ENV + " mode)");
 }

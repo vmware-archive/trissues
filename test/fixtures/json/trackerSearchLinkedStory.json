@@ -16,7 +16,7 @@
           "id": 2208,
           "integration_id": 58,
           "kind": "story",
-          "labels": [],
+          "labels": [{"name": "already there", "id": 1234}],
           "name": "On story-import request from Tracker, makes request to GitHub for issues, reformats result from GH and returns to Tracker in XML",
           "owned_by_id": 202,
           "owner_ids": [

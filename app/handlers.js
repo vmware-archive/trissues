@@ -64,12 +64,16 @@ module.exports = {
 
     var promises = [],
         webhook = req.body;
+    helpers.log("about to set config");
     fromGitHub.setConfig(config);
-
-    helpers.log("    GitHub webhook is for the activity '" + (webhook && webhook.activity) + "'");
-    if (fromGitHub.isIssueWithLabelChange(promises, webhook)) {
-      fromGitHub.updateStoryLabelsInTracker(promises, webhook);
+    if (fromGitHub.isIssueWithLabelChange(webhook)) {
+      helpers.log("about to push the promise");
+      var p = fromGitHub.updateStoryLabelsInTracker(webhook);
+      helpers.log(p);
+      promises.push(p);
+      helpers.log("Pushed the promise, now " + promises.lenght + " in array");
     }
+    helpers.log("About to call finish request");
     fromGitHub.finishRequest(promises, res, next);
   },
 
