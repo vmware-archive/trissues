@@ -19,17 +19,26 @@ fromGitHub = {
 
   updateStoryLabelsInTracker: function (promises, webhook) {
     var issueId = webhook.issue.number,
+        newLabel = webhook.label.name,
         qualifiedProject = tracker.project(config.tracker.projectid),
         searcher = Promise.promisify(qualifiedProject.search, qualifiedProject),
         promise = searcher("external_id:"+issueId);
-
     promises.push(promise);
-    promise.then(function(result) {
-      // {epics:[], stories:[Object]}
-      console.log("Label from webhook: ", webhook.label.name);
-      console.log(result.stories[0].labels);
-      // { labels: [{name: 'new name'}]}
-    });
+
+    promise.then(function (result) {
+      var storyId = result.stories[0].id,
+          qualifiedStory =
+              tracker.project(config.tracker.projectid).story(storyId),
+          updater = Promise.promisify(qualifiedStory.update, qualifiedStory),
+          newInfo = {
+            labels: [{ name: newLabel }]
+          },
+          promise = updater(newInfo);
+      promises.push(promise);
+      return promise;
+    })
+.then(function () { console.log(arguments); })
+;
   },
 
   finishRequest: function (promises, res, next) {
@@ -37,7 +46,6 @@ fromGitHub = {
       promises.push(Promise.resolve());
     }
     Promise.settle(promises).then(function () {
-      // helpers.log("    sending response with status 200");
       res.send(200);
       return next();
     });
