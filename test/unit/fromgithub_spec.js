@@ -2,6 +2,7 @@
 /*jshint expr:true*/
 
 var mitmFactory = require("mitm"),
+    Promise = require("bluebird"),
     config = require("environmental").config(),
     mitm,
 
@@ -43,7 +44,7 @@ describe("fromGitHub", function () {
       var promises = [],
           trackerSearchLinkedStory = loadJsonFile("trackerSearchLinkedStory"),
           storyId = 2208,
-          putLables = null;
+          putLabels = null;
 
       mitm.on("request", function (req, res) {
         res.statusCode = 200;
@@ -56,10 +57,9 @@ describe("fromGitHub", function () {
           }
         } else if (req.method === "PUT") {
           req.url.should.equal("/services/v5/projects/" + projectId + "/stories/" + storyId);
-          var responseObj = {it: "worked"};
           putLabels = req.body;
-          console.log(req.body);
 
+          var responseObj = { it: "worked" };
           res.end(JSON.stringify(responseObj));
         } else {
           ("Should not be receiving a "+req.method+" request").should.equal(null);
@@ -67,11 +67,12 @@ describe("fromGitHub", function () {
       });
 
       fromGitHub.updateStoryLabelsInTracker(promises, loadJsonFixture("githubWebhookLabelAdd"));
-      promises[0].
-          then(function () {
-            // console.log(arguments);
+      Promise
+          .settle(promises)
+          .then(function () {
+            console.log(arguments);
+            putLabels.should.equal("fred");
           });
-      putLables.should.equal("fred");
     });
   });
 });
