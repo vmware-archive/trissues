@@ -21,12 +21,7 @@
 #   - DEBUG=*.*               # Used to control debug levels per module
 
 export NODE_APP_PREFIX="TRISSUES"
-export TRISSUES_SERVER_PORT="8000"
-export TRISSUES_GITHUB_REPO="pivotaltracker/trissues"
-export TRISSUES_EXCLUDE_LABELS="wontfix, invalid, duplicate"
-
-export TRISSUES_TRACKER_PROJECTID=101
-#export TRISSUES_TRACKER_INTEGRATIONID=33098
+export TRISSUES_EXCLUDE_LABELS=${TRISSUES_EXCLUDE_LABELS:="wontfix, invalid, duplicate"}
 
 export TRISSUES_AUTH_GITHUB=${TRISSUES_AUTH_GITHUB:="fake-test-token"}
 export TRISSUES_AUTH_TRACKER=${TRISSUES_AUTH_TRACKER:="fake-test-token"}

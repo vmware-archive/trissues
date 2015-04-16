@@ -33,10 +33,10 @@ fromGitHub = {
 
     var qualifiedProject = tracker.project(config.tracker.projectid),
         searcher = Promise.promisify(qualifiedProject.search, qualifiedProject),
-        promise = searcher("external_id:"+issueId);
+        projectSearchPromise = searcher("external_id:"+issueId),
+        wereDonePromise = helpers.emptyPromise();
 
-    return promise.then(function (result) {
-      helpers.log("    *** got story search result " + result);
+    projectSearchPromise.then(function (result) {
       var storyHash = result.stories[0],
           storyId = storyHash.id,
           alreadyThere = storyHash.labels.some(function (labelHash) {
@@ -55,21 +55,23 @@ fromGitHub = {
               labels: storyHash.labels
             };
         helpers.log("    updating Tracker story #" + storyId + " with revised label hashes " + newInfo);
-        return updater(newInfo);
+        wereDonePromise.resolve(updater(newInfo));
       } else {
         helpers.log("    skipping existing label");
-        return Promise.resolve();
+        wereDonePromise.resolve();
       }
+    }).catch(function (e) {
+      helpers.log(e);
     });
+
+    return wereDonePromise;
   },
 
   finishRequest: function (promises, res, next) {
-    helpers.log("Waiting for promises "+promises.length+" to settle");
     if (promises.length === 0) {
       promises.push(Promise.resolve());
     }
     Promise.settle(promises).then(function () {
-      helpers.log("    sending resonse with status 200");
       res.send(200);
       return next();
     });

@@ -2,8 +2,8 @@
 /*jshint expr:true*/
 
 var mitmFactory = require("mitm"),
-    Promise = require("bluebird"),
     config = require("environmental").config(),
+    helpers = require("../../app/helpers"),
     mitm,
 
     projectId = 101,
@@ -12,25 +12,6 @@ var mitmFactory = require("mitm"),
     fromGitHub = rewireInApp("fromGitHub");
 
 describe("fromGitHub", function () {
-  function emptyPromise() {
-    var promiseResolver,
-        promiseRejecter,
-        promise = new Promise(function (resolver, rejecter) {
-          promiseResolver = resolver;
-          promiseRejecter = rejecter;
-        });
-    promise.resolve = function () {
-      promiseResolver.apply(this, arguments);
-      return promise;
-    };
-    promise.reject =  function () {
-      promiseRejecter.apply(this, arguments);
-      return promise;
-    };
-
-    return promise;
-  }
-
   beforeEach(function () {
     fromGitHub.setConfig(config);
   });
@@ -74,7 +55,7 @@ describe("fromGitHub", function () {
         } else if (req.method === "PUT") {
           req.url.should.equal("/services/v5/projects/" + projectId + "/stories/" + storyId + "?envelope=true");
           var accumulator = "",
-              promise = emptyPromise();
+              promise = helpers.emptyPromise();
           req.on("end", function () { promise.resolve(accumulator); });
           req.on("data", function (chunk) {
             accumulator += chunk.toString();

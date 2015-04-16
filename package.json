@@ -13,7 +13,8 @@
   "licenses": "MIT",
   "main": "index",
   "scripts": {
-    "start": "/usr/bin/env bash -c 'source envs/development.sh ; node index'",
+    "start": "/usr/bin/env bash -c 'source envs/production.sh ; node index'",
+    "dev": "/usr/bin/env bash -c 'source envs/development.sh ; node index'",
     "test":  "grunt"
   },
   "engines": {

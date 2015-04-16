@@ -73,7 +73,7 @@ fromTracker = {
       promises.push(Promise.resolve());
     }
     Promise.settle(promises).then(function () {
-      helpers.log("    sending resonse with status 200");
+      helpers.log("    sending response with status 200");
       res.send(200);
       return next();
     });

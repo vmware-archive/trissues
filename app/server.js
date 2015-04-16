@@ -21,6 +21,8 @@ function launch() {
   server.post("/fromgithub", handlers.fromgithub);
   server.listen(parseInt(port));
   helpers.log("Server running at http://127.0.0.1:" + port + "/  (" + process.env.NODE_ENV + " mode)");
+  helpers.log("Config", config);
+  helpers.log("process env", process.env);
 }
 
 module.exports = { launch: launch };
