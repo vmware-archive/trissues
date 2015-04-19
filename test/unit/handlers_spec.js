@@ -7,7 +7,7 @@ var should = require("should"),
     fs = require("fs"),
     mitmFactory = require("mitm"),
     parseXml = require("xml2js").parseString,
-    helpers = require("./test_helpers.js"),
+    testHelpers = require("./test_helpers.js"),
 
 // code under test
     handlers = rewireInApp("handlers"),
@@ -17,7 +17,7 @@ var should = require("should"),
 
 describe("handlers", function () {
   beforeEach(function () {
-    helpers.stubLogging(handlers);
+    testHelpers.stubLogging(handlers);
 
     config = handlers.__get__("config");
     sandbox = sinon.sandbox.create();
@@ -30,7 +30,7 @@ describe("handlers", function () {
     mitm.disable();
   });
 
-  describe("githubissues", function () {
+  describe("/githubissues", function () {
     var jsonResponse = fs.readFileSync(__dirname + "/../fixtures/json/githubIssuesResponse.json", { encoding: "utf8" }),
         xmlResponse = fs.readFileSync(__dirname + "/../fixtures/xml/fixtureResponse.xml", { encoding: "utf8" });
 
@@ -102,7 +102,7 @@ describe("handlers", function () {
     });
   });
 
-  describe("fromtracker", function () {
+  describe("/fromtracker", function () {
     afterEach(function () {
       next.calledOnce.should.be.true;
       res.send.calledOnce.should.be.true;
@@ -153,7 +153,7 @@ describe("handlers", function () {
     });
   });
 
-  describe("fromgithub", function () {
+  describe("/fromgithub", function () {
     var fromGitHub, isIssueStub, updateStoryStub, next,
         webhookHash = loadJsonFixture("githubWebhookLabelRemove"),
         req = { body: webhookHash };

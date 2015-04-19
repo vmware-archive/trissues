@@ -1,9 +1,22 @@
 var restify = require("restify"),
     config = require("environmental").config(),
     xml = require("xml"),
+    Promise = require("bluebird"),
     helpers = require("./helpers"),
     fromGitHub = require("./fromGitHub"),
     fromTracker = require("./fromTracker");
+
+
+function finishRequest(promises, res, next) {
+  if (promises.length === 0) {
+    promises.push(Promise.resolve());
+  }
+  Promise.settle(promises).then(function () {
+    helpers.log("    sending response with status 200");
+    res.send(200);
+    return next();
+  });
+}
 
 module.exports = {
   githubissues: function (req, res, next) {
@@ -69,7 +82,7 @@ module.exports = {
       var p = fromGitHub.updateStoryLabelsInTracker(webhook);
       promises.push(p);
     }
-    fromGitHub.finishRequest(promises, res, next);
+    finishRequest(promises, res, next);
   },
 
   fromtracker: function (req, res, next) {
@@ -79,14 +92,14 @@ module.exports = {
         activity = req.body;
     fromTracker.setConfig(config);
 
-    helpers.log("    Tracker activity item contains " + activity.changes.length + " resource changes");
+    helpers.log("    Tracker '" + activity.kind + "' activity item contains " + activity.changes.length + " resource change(s)");
     activity.changes.forEach(function (changeHash) {
       if (fromTracker.isStoryWithStateChange(promises, changeHash)) {
-        helpers.log("   state change to story " + changeHash.id);
+        helpers.log("    state change to story " + changeHash.id);
         fromTracker.updateStateLabelsInGitHub(promises, activity, changeHash);
       }
     });
 
-    fromTracker.finishRequest(promises, res, next);
+    finishRequest(promises, res, next);
   }
 };

@@ -1,0 +1,37 @@
+{
+  "kind": "story_delete_activity",
+  "guid": "1323704_36",
+  "project_version": 36,
+  "message": "Glen Ivey deleted this feature",
+  "highlight": "deleted",
+  "changes": [
+    {
+      "kind": "story",
+       "change_type": "delete",
+       "id": 89146028,
+       "name": "Have checks for broken page links",
+       "story_type": "feature"
+    }
+  ],
+  "primary_resources": [
+    {
+      "kind": "story",
+       "id": 89146028,
+       "name": "Have checks for broken page links",
+       "story_type": "feature",
+       "url": "https://www.pivotaltracker.com/story/show/92764268"
+    }
+  ],
+  "project": {
+    "kind": "project",
+     "id": 1286564,
+     "name": "Trivial Server for Markdown via Express (TSME)"
+  },
+  "performed_by": {
+    "kind": "person",
+    "id": 11957,
+    "name": "Glen Ivey",
+    "initials": "gei"
+  },
+  "occurred_at": 1429383495000
+}

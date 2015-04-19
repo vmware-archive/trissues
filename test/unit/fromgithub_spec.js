@@ -4,6 +4,7 @@
 var mitmFactory = require("mitm"),
     config = require("environmental").config(),
     helpers = require("../../app/helpers"),
+    testHelpers = require("./test_helpers.js"),
     mitm,
 
     projectId = 101,
@@ -14,6 +15,7 @@ var mitmFactory = require("mitm"),
 describe("fromGitHub", function () {
   beforeEach(function () {
     fromGitHub.setConfig(config);
+    testHelpers.stubLogging(fromGitHub);
   });
 
   describe("#isIssueFromLabelChange", function () {

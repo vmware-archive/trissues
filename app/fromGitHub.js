@@ -65,16 +65,6 @@ fromGitHub = {
     });
 
     return wereDonePromise;
-  },
-
-  finishRequest: function (promises, res, next) {
-    if (promises.length === 0) {
-      promises.push(Promise.resolve());
-    }
-    Promise.settle(promises).then(function () {
-      res.send(200);
-      return next();
-    });
   }
 };
 
