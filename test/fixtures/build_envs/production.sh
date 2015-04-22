@@ -6,3 +6,5 @@ source ${__DIR}/_default.sh
 export DEPLOY_ENV="$(basename "${BASH_SOURCE[0]}" .sh)"
 export NODE_ENV="production"
 #export DEBUG=*:*
+
+export TRISSUES_SERVER_PORT=3000

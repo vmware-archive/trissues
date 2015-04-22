@@ -3,8 +3,8 @@ var Promise = require("bluebird"),
     helpers;
 
 helpers = {
-  log: function (message) {
-    console.log(message);
+  log: function () {
+    console.log.apply(console, arguments);
   },
 
   emptyPromise: function () {
