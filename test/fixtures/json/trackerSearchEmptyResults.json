@@ -1,0 +1,18 @@
+{
+  "http_status": "200",
+  "project_version": 91,
+  "data": {
+    "stories": {
+      "stories": [],
+      "total_hits": 0,
+      "total_hits_with_done": 0,
+      "total_points": 0,
+      "total_points_completed": 0
+    },
+    "epics": {
+      "epics": [],
+      "total_hits": 0
+    },
+    "query": "what you searched for"
+  }
+}

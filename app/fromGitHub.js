@@ -36,12 +36,18 @@ fromGitHub = {
 
     var qualifiedProject = tracker.project(config.tracker.projectid),
         searcher = Promise.promisify(qualifiedProject.search, qualifiedProject),
-        projectSearchPromise = searcher("external_id:"+issueId),
+        projectSearchPromise = searcher("external_id:" + issueId + " includedone:true"),
         wereDonePromise = helpers.emptyPromise();
 
     projectSearchPromise.then(function (result) {
-      var storyHash = result.stories[0],
-          storyId = storyHash.id,
+      var storyHash = result.stories[0];
+      if (!storyHash || !storyHash.id) {
+        helpers.log("    skipping; can't find matching story in Tracker");
+        wereDonePromise.resolve();
+        return;
+      }
+
+      var storyId = storyHash.id,
           changedLabelPresent = storyHash.labels.some(function (labelHash) {
             return labelHash.name === changedLabel;
           });
