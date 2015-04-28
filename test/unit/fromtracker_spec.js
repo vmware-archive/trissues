@@ -1,6 +1,7 @@
 /*globals describe, it, beforeEach, afterEach, rewireInApp, loadJsonFixture, loadJsonFile */
 /*jshint expr:true*/
 
+require("should");
 var mitmFactory = require("mitm"),
     config = require("environmental").config(),
     Promise = require("bluebird"),

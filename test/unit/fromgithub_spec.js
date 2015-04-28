@@ -1,6 +1,7 @@
 /*globals describe, it, beforeEach, afterEach, rewireInApp, loadJsonFixture, loadJsonFile */
 /*jshint expr:true*/
 
+require("should");
 var mitmFactory = require("mitm"),
     config = require("environmental").config(),
     helpers = require("../../app/helpers"),
@@ -23,9 +24,9 @@ describe("fromGitHub", function () {
       fromGitHub.isIssueWithLabelChange(loadJsonFixture("githubWebhookLabelAdd")).should.be.true;
     });
 
-    // it("returns true when a label is removed", function () {
-    //   fromGitHub.isIssueWithLabelChange(loadJsonFixture("githubWebhookLabelRemove")).should.be.true;
-    // });
+    it("returns true when a label is removed", function () {
+      fromGitHub.isIssueWithLabelChange(loadJsonFixture("githubWebhookLabelRemove")).should.be.true;
+    });
 
     it("returns false for webhooks with non-label actions", function () {
       fromGitHub.isIssueWithLabelChange(loadJsonFixture("githubWebhookIssueClosed")).should.be.false;
@@ -42,7 +43,7 @@ describe("fromGitHub", function () {
       mitm.disable();
     });
 
-    it("Updates tracker if necessary", function (done) {
+    function checkTrackerUpdate(githubWebhookFile, expectedLabelUpdates, done) {
       var trackerSearchLinkedStory = loadJsonFile("trackerSearchLinkedStory"),
           storyId = 2208;
 
@@ -64,7 +65,7 @@ describe("fromGitHub", function () {
           });
 
           promise.then(function (body) {
-            JSON.parse(body).should.eql({ labels: [{ id: 1234, name: "already there" }, { name: "help wanted" }] });
+            JSON.parse(body).should.eql({ labels: expectedLabelUpdates });
             var responseObj = { it: "worked" };
             res.end(JSON.stringify(responseObj));
           });
@@ -74,8 +75,24 @@ describe("fromGitHub", function () {
       });
 
       fromGitHub
-          .updateStoryLabelsInTracker(loadJsonFixture("githubWebhookLabelAdd"))
+          .updateStoryLabelsInTracker(loadJsonFixture(githubWebhookFile))
           .then(function () { done(); });
+    }
+
+    it("Updates tracker for a label add", function (done) {
+      checkTrackerUpdate(
+        "githubWebhookLabelAdd",
+        [{ id: 1234, name: "already there" }, { name: "help wanted" }],
+        done
+      );
+    });
+
+    it("Updates tracker for a label remove", function (done) {
+      checkTrackerUpdate(
+        "githubWebhookLabelRemove",
+        [],
+        done
+      );
     });
 
     it("Does not update tracker if unnecessary", function (done) {

@@ -1,4 +1,5 @@
-var Promise = require("bluebird"),
+var _ = require("lodash"),
+    Promise = require("bluebird"),
     Client = require("pivotaltracker").Client,
     helpers = require("./helpers"),
     trackerStateNames = [
@@ -19,14 +20,16 @@ fromGitHub = {
   },
 
   isIssueWithLabelChange: function (webhook) {
-    return webhook && (webhook.action === "labeled"); //|| webhook.action === "unlabeled";
+    return webhook && (webhook.action === "labeled" || webhook.action === "unlabeled");
   },
 
   updateStoryLabelsInTracker: function (webhook) {
-    var newLabel = webhook.label.name,
+    var action = (webhook.action === "labeled") ? "added" : "removed",
+        direction = (webhook.action === "labeled") ? "to" : "from",
+        changedLabel = webhook.label.name,
         issueId = webhook.issue.number;
-    helpers.log("    added label '" + newLabel + "' to GitHub Issue #" + issueId);
-    if (trackerStateNames.indexOf(newLabel) > -1) {
+    helpers.log("    " + action + " label '" + changedLabel + "' " + direction + " GitHub Issue #" + issueId);
+    if (trackerStateNames.indexOf(changedLabel) > -1) {
       helpers.log("    skipping state label");
       return Promise.resolve();
     }
@@ -39,26 +42,44 @@ fromGitHub = {
     projectSearchPromise.then(function (result) {
       var storyHash = result.stories[0],
           storyId = storyHash.id,
-          alreadyThere = storyHash.labels.some(function (labelHash) {
-            return labelHash.name === newLabel;
+          changedLabelPresent = storyHash.labels.some(function (labelHash) {
+            return labelHash.name === changedLabel;
           });
 
       helpers.log("    for GH issue " + issueId + ", the Tracker story is #" + storyId);
-      if (!alreadyThere) {
-        var qualifiedStory =
-                tracker.project(config.tracker.projectid).story(storyId),
-            updater = Promise.promisify(qualifiedStory.update, qualifiedStory);
 
-        storyHash.labels.push({ name: newLabel });
+      var qualifiedStory =
+              tracker.project(config.tracker.projectid).story(storyId),
+          updater = Promise.promisify(qualifiedStory.update, qualifiedStory),
+          newInfo;
+      if (webhook.action === "labeled") {
+        if (changedLabelPresent) {
+          helpers.log("    skipping add of existing label");
+          wereDonePromise.resolve();
+        } else {
+          storyHash.labels.push({ name: changedLabel });
 
-        var newInfo = {
-              labels: storyHash.labels
-            };
-        helpers.log("    updating Tracker story #" + storyId + " with revised label hashes " + newInfo);
-        wereDonePromise.resolve(updater(newInfo));
+          newInfo = {
+            labels: storyHash.labels
+          };
+          helpers.log("    updating Tracker story #" + storyId + " with revised label hashes " + newInfo);
+          wereDonePromise.resolve(updater(newInfo));
+        }
+      } else if (webhook.action === "unlabeled") {
+        if (!changedLabelPresent) {
+          helpers.log("    skipping remove of missing label");
+          wereDonePromise.resolve();
+        } else {
+          newInfo = {
+            labels: _.select(storyHash.labels, function (labelHash) {
+              return labelHash.name !== changedLabel;
+            })
+          };
+          helpers.log("    updating Tracker story #" + storyId + " with revised label hashes " + newInfo);
+          wereDonePromise.resolve(updater(newInfo));
+        }
       } else {
-        helpers.log("    skipping existing label");
-        wereDonePromise.resolve();
+        throw new Error("Internal error:  processing label add/remove, but action was " + webhook.action);
       }
     }).catch(function (e) {
       helpers.log(e);
