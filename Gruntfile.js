@@ -14,6 +14,7 @@ function configureGrunt(grunt) {
   _.merge(configuration, require("quick-grunt-config-mocha-sauce")(grunt));
   _.merge(configuration, requireComponent("tests")(grunt));   // extra config/tasks to go with ...-mocha-sauce
 
+  grunt.registerTask("unit", "alias for 'test-unit'", ["test-unit"]);
   grunt.registerTask("validate", "run all the checks and tests",
       [
         "jshint", "jscs",                  // from quick-grunt-config-coding-standards
