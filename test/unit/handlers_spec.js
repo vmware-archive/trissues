@@ -16,6 +16,13 @@ var should = require("should"),
 
 
 describe("handlers", function () {
+  var trackerIps = [
+          "67.214.223.6", "67.214.223.25", "208.85.150.190", "208.85.150.184",
+          "67.214.223.7", "67.214.223.21", "208.85.150.188", "208.85.150.177"
+      ],
+      goodIp = trackerIps[0],
+      req;
+
   beforeEach(function () {
     testHelpers.stubLogging(handlers);
 
@@ -24,6 +31,13 @@ describe("handlers", function () {
     res = { send: sandbox.stub() };
     next = sandbox.stub();
     mitm = mitmFactory();
+
+    req = {
+      connection: { remoteAddress: goodIp },
+      header: function () {
+        return null;
+      }
+    };
   });
   afterEach(function () {
     sandbox.restore();
@@ -103,53 +117,83 @@ describe("handlers", function () {
   });
 
   describe("/fromtracker", function () {
-    afterEach(function () {
-      next.calledOnce.should.be.true;
-      res.send.calledOnce.should.be.true;
-      res.send.firstCall.args[0].should.equal(200);
-    });
-
-    it("accepts but ignores activity we don't care about", function () {
-      var req = { body: loadJsonFixture("trackerWebhookTaskEdit") };
-      handlers.fromtracker(req, res, next);
-    });
-
-    it("sends label updates to GH when linked story in Tracker changes state", function (done) {
-      var req = { body: loadJsonFixture("trackerWebhookLinkedStoryStarted") },
-          trackerStoryResponse = loadJsonFile("trackerLinkedStoryResponse"),
-          issueGetResponse = loadJsonFile("githubIssueGetResponse"),
-          projectId = 1286564,
-          storyId = 89146028,
-          issueNumber = 2;
-
-      config.tracker = { integrationid: "33098" };
-
-      mitm.on("request", function (req, res) {
-        res.statusCode = 200;
-        if (req.method === "GET") {
-          if (req.url === "/services/v5/projects/" + projectId + "/stories/" + storyId + "?envelope=true") {
-            res.end(trackerStoryResponse);
-          } else if (req.url === "/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token") {
-            res.end(issueGetResponse);
-          } else {
-            ("Unexpected url requested: " + req.url).should.equal(null);
-          }
-        } else if (req.method === "POST") {    // simulated PATCH
-          req.url.should.equal("/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token");
-          var responseObj = JSON.parse(issueGetResponse);
-          res.end(JSON.stringify(responseObj));   // send back unmodified resource, OK because code never looks at content
-        } else {
-          ("Should not be receiving a " + req.method + " request").should.equal(null);
-        }
-      });
-
-      next = sandbox.spy(function () {
+    describe("succeeds and", function () {
+      afterEach(function () {
+        next.calledOnce.should.be.true;
         res.send.calledOnce.should.be.true;
         res.send.firstCall.args[0].should.equal(200);
-
-        done();
       });
-      handlers.fromtracker(req, res, next);
+
+      it("accepts but ignores activity we don't care about", function () {
+        req.body = loadJsonFixture("trackerWebhookTaskEdit");
+        handlers.fromtracker(req, res, next);
+      });
+
+      it("sends label updates to GH when linked story in Tracker changes state", function (done) {
+        var trackerStoryResponse = loadJsonFile("trackerLinkedStoryResponse"),
+            issueGetResponse = loadJsonFile("githubIssueGetResponse"),
+            projectId = 1286564,
+            storyId = 89146028,
+            issueNumber = 2;
+
+        req.body = loadJsonFixture("trackerWebhookLinkedStoryStarted");
+        config.tracker = { integrationid: "33098" };
+
+        mitm.on("request", function (req, res) {
+          res.statusCode = 200;
+          if (req.method === "GET") {
+            if (req.url === "/services/v5/projects/" + projectId + "/stories/" + storyId + "?envelope=true") {
+              res.end(trackerStoryResponse);
+            } else if (req.url === "/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token") {
+              res.end(issueGetResponse);
+            } else {
+              ("Unexpected url requested: " + req.url).should.equal(null);
+            }
+          } else if (req.method === "POST") {    // simulated PATCH
+            req.url.should.equal("/repos/pivotaltracker/trissues/issues/" + issueNumber + "?access_token=fake-test-token");
+            var responseObj = JSON.parse(issueGetResponse);
+            res.end(JSON.stringify(responseObj));   // send back unmodified resource, OK because code never looks at content
+          } else {
+            ("Should not be receiving a " + req.method + " request").should.equal(null);
+          }
+        });
+
+        next = sandbox.spy(function () {
+          res.send.calledOnce.should.be.true;
+          res.send.firstCall.args[0].should.equal(200);
+
+          done();
+        });
+        handlers.fromtracker(req, res, next);
+      });
+    });
+
+    describe("fails POSTs that don't originate from an actual Tracker IP address", function () {
+      var badIp = "192.168.10.200";
+
+      beforeEach(function () {
+        req.body = loadJsonFixture("trackerWebhookLinkedStoryStarted");
+      });
+
+      function doTest() {
+        handlers.fromtracker(req, res, next);
+
+        next.calledOnce.should.be.true;
+        res.send.calledOnce.should.be.true;
+        res.send.firstCall.args[0].should.equal(403);
+      }
+
+      it("when IP address is in x-forwarded-for", function () {
+        req.header = function (key) {
+          return (key === "x-forwarded-for") ? badIp : null;
+        };
+        doTest();
+      });
+
+      it("when IP addrss is in the net connection object", function () {
+        req.connection.remoteAddress = badIp;
+        doTest();
+      });
     });
   });
 

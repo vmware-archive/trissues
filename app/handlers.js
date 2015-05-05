@@ -4,8 +4,12 @@ var restify = require("restify"),
     Promise = require("bluebird"),
     helpers = require("./helpers"),
     fromGitHub = require("./fromGitHub"),
-    fromTracker = require("./fromTracker");
+    fromTracker = require("./fromTracker"),
 
+    trackerIps = [
+      "67.214.223.6", "67.214.223.25", "208.85.150.190", "208.85.150.184",
+      "67.214.223.7", "67.214.223.21", "208.85.150.188", "208.85.150.177"
+    ];
 
 function finishRequest(promises, res, next) {
   if (promises.length === 0) {
@@ -87,6 +91,13 @@ module.exports = {
 
   fromtracker: function (req, res, next) {
     helpers.log("POST request to /fromtracker");
+
+    var ipAddress = req.header("x-forwarded-for") || req.connection.remoteAddress;
+    if (trackerIps.indexOf(ipAddress) === -1) {
+      helpers.log("    WARNING:  request from unknown IP address " + ipAddress + ", responding with 403");
+      res.send(403);
+      return next();
+    }
 
     var promises = [],
         activity = req.body;
