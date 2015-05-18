@@ -1,9 +1,26 @@
 var restify = require("restify"),
     config = require("environmental").config(),
     xml = require("xml"),
+    Promise = require("bluebird"),
     helpers = require("./helpers"),
     fromGitHub = require("./fromGitHub"),
-    fromTracker = require("./fromTracker");
+    fromTracker = require("./fromTracker"),
+
+    trackerIps = [
+      "67.214.223.6", "67.214.223.25", "208.85.150.190", "208.85.150.184",
+      "67.214.223.7", "67.214.223.21", "208.85.150.188", "208.85.150.177"
+    ];
+
+function finishRequest(promises, res, next) {
+  if (promises.length === 0) {
+    promises.push(Promise.resolve());
+  }
+  Promise.settle(promises).then(function () {
+    helpers.log("    sending response with status 200");
+    res.send(200);
+    return next();
+  });
+}
 
 module.exports = {
   githubissues: function (req, res, next) {
@@ -69,24 +86,31 @@ module.exports = {
       var p = fromGitHub.updateStoryLabelsInTracker(webhook);
       promises.push(p);
     }
-    fromGitHub.finishRequest(promises, res, next);
+    finishRequest(promises, res, next);
   },
 
   fromtracker: function (req, res, next) {
     helpers.log("POST request to /fromtracker");
 
+    var ipAddress = req.header("x-forwarded-for") || req.connection.remoteAddress;
+    if (trackerIps.indexOf(ipAddress) === -1) {
+      helpers.log("    WARNING:  request from unknown IP address " + ipAddress + ", responding with 403");
+      res.send(403);
+      return next();
+    }
+
     var promises = [],
         activity = req.body;
     fromTracker.setConfig(config);
 
-    helpers.log("    Tracker activity item contains " + activity.changes.length + " resource changes");
+    helpers.log("    Tracker '" + activity.kind + "' activity item contains " + activity.changes.length + " resource change(s)");
     activity.changes.forEach(function (changeHash) {
       if (fromTracker.isStoryWithStateChange(promises, changeHash)) {
-        helpers.log("   state change to story " + changeHash.id);
+        helpers.log("    state change to story " + changeHash.id);
         fromTracker.updateStateLabelsInGitHub(promises, activity, changeHash);
       }
     });
 
-    fromTracker.finishRequest(promises, res, next);
+    finishRequest(promises, res, next);
   }
 };

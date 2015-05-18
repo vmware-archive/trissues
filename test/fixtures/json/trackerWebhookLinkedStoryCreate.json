@@ -1,0 +1,56 @@
+{
+  "kind": "story_create_activity",
+  "guid": "1323704_37",
+  "project_version": 37,
+  "message": "Glen Ivey added this feature",
+  "highlight": "added",
+  "changes": [
+    {
+      "kind": "story",
+      "change_type": "create",
+      "id": 89146028,
+      "new_values": {
+        "id": 92764886,
+        "project_id": 1323704,
+        "name": "Have checks for broken page links",
+        "description": "Statically?  As part of integration tests?  What about off-site links--how to verify and still have tests run without a net connection?",
+        "story_type": "feature",
+        "current_state": "unstarted",
+        "requested_by_id": 11957,
+        "owner_ids": [],
+        "label_ids": [],
+        "follower_ids": [],
+        "created_at": 1429385133000,
+        "updated_at": 1429385133000,
+        "before_id": 91395294,
+        "after_id": 92585012,
+        "integration_id": 33098,
+        "external_id": "2",
+        "labels": []
+      },
+      "name": "Have checks for broken page links",
+      "story_type": "feature"
+    }
+  ],
+  "primary_resources": [
+    {
+      "kind": "story",
+      "id": 89146028,
+      "name": "Have checks for broken page links",
+      "story_type": "feature",
+      "url": "https://www.pivotaltracker.com/story/show/92764616"
+    }
+  ],
+  "project": {
+    "kind": "project",
+    "id": 1286564,
+    "name": "Trivial Server for Markdown via Express (TSME)"
+  },
+  "performed_by": {
+    "kind": "person",
+    "id": 11957,
+    "name": "Glen Ivey",
+    "initials": "gei"
+  },
+  "occurred_at": 1429383613000
+}

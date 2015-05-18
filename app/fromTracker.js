@@ -26,16 +26,15 @@ fromTracker = {
         storyId = changeHash.id,
         qualifiedStory = tracker.project(projectId).story(storyId),
         getter = Promise.promisify(qualifiedStory.get, qualifiedStory),
+        wereDonePromise = helpers.emptyPromise(),
         promise = getter(),
         issue;
 
-    promises.push(promise);
-    promise.
-        then(function (story) {
-          helpers.log("    Story integration id: " + story.integrationId + " configured integration id: " + config.tracker.integrationid);
-
+    promises.push(wereDonePromise);
+    promise
+        .then(function (story) {
           if (story.integrationId === parseInt(config.tracker.integrationid)) {
-            helpers.log("    story's integrationId matches our configuration");
+            helpers.log("    story (" + story.id + ")'s integrationId (" + story.integrationId + ") matches our configuration");
 
             var github = octonode.client(config.auth.github);
             issue = github.issue(config.github.repo, story.externalId);
@@ -46,12 +45,12 @@ fromTracker = {
             return promise;
           }
           return Promise.reject("Operation unneeded");
-        }).
-        then(function (issues) {
+        })
+        .then(function (issues) {
           helpers.log("   Matching GitHub issue received");
           var issueHash = issues[0],
               labelToAdd = changeHash.new_values.current_state,
-              labelToRemove = changeHash.original_values.current_state,
+              labelToRemove = changeHash.original_values && changeHash.original_values.current_state,
               labelNames = issueHash.labels.map(function (labelObj) {
                 return labelObj.name;
               }),
@@ -60,23 +59,21 @@ fromTracker = {
               });
           newLabelNames.push(labelToAdd);
 
-          helpers.log("    original Issue lables were " + labelNames + ", changing to " + newLabelNames);
+          helpers.log("    original Issue labels were " + labelNames + ", changing to " + newLabelNames);
           issue.update({ labels: newLabelNames }, function (error) {
-            helpers.log("    uptade to GitHub " + (error === null ? "succeeded" : "failed"));
+            if (error) {
+              helpers.log("    update to GitHub " + (error === null ? "succeeded" : "failed"));
+              helpers.log(" -- ERROR RESPONSE from GitHub --");
+              helpers.log(error);
+            }
+            wereDonePromise.resolve();
           });
+        })
+        .catch(function (error) {
+          helpers.log(" -- CAUGHT EXCEPTION -- ");
+          helpers.log(error);
+          helpers.log(error.stack);
         });
-  },
-
-
-  finishRequest: function (promises, res, next) {
-    if (promises.length === 0) {
-      promises.push(Promise.resolve());
-    }
-    Promise.settle(promises).then(function () {
-      helpers.log("    sending response with status 200");
-      res.send(200);
-      return next();
-    });
   }
 };
 

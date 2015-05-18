@@ -1,9 +1,11 @@
 /*globals describe, it, beforeEach, afterEach, rewireInApp, loadJsonFixture, loadJsonFile */
 /*jshint expr:true*/
 
+require("should");
 var mitmFactory = require("mitm"),
     config = require("environmental").config(),
     helpers = require("../../app/helpers"),
+    testHelpers = require("./test_helpers.js"),
     mitm,
 
     projectId = 101,
@@ -14,6 +16,7 @@ var mitmFactory = require("mitm"),
 describe("fromGitHub", function () {
   beforeEach(function () {
     fromGitHub.setConfig(config);
+    testHelpers.stubLogging(fromGitHub);
   });
 
   describe("#isIssueFromLabelChange", function () {
@@ -21,9 +24,9 @@ describe("fromGitHub", function () {
       fromGitHub.isIssueWithLabelChange(loadJsonFixture("githubWebhookLabelAdd")).should.be.true;
     });
 
-    // it("returns true when a label is removed", function () {
-    //   fromGitHub.isIssueWithLabelChange(loadJsonFixture("githubWebhookLabelRemove")).should.be.true;
-    // });
+    it("returns true when a label is removed", function () {
+      fromGitHub.isIssueWithLabelChange(loadJsonFixture("githubWebhookLabelRemove")).should.be.true;
+    });
 
     it("returns false for webhooks with non-label actions", function () {
       fromGitHub.isIssueWithLabelChange(loadJsonFixture("githubWebhookIssueClosed")).should.be.false;
@@ -40,14 +43,14 @@ describe("fromGitHub", function () {
       mitm.disable();
     });
 
-    it("Updates tracker if necessary", function (done) {
+    function checkTrackerUpdate(githubWebhookFile, expectedLabelUpdates, done) {
       var trackerSearchLinkedStory = loadJsonFile("trackerSearchLinkedStory"),
           storyId = 2208;
 
       mitm.on("request", function (req, res) {
         res.statusCode = 200;
         if (req.method === "GET") {
-          if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A2&envelope=true") {
+          if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A2%20includedone%3Atrue&envelope=true") {
             res.end(trackerSearchLinkedStory);
           } else {
             ("Unexpected url requested: " + req.url).should.equal(null);
@@ -62,7 +65,7 @@ describe("fromGitHub", function () {
           });
 
           promise.then(function (body) {
-            JSON.parse(body).should.eql({ labels: [{ id: 1234, name: "already there" }, { name: "help wanted" }] });
+            JSON.parse(body).should.eql({ labels: expectedLabelUpdates });
             var responseObj = { it: "worked" };
             res.end(JSON.stringify(responseObj));
           });
@@ -72,7 +75,41 @@ describe("fromGitHub", function () {
       });
 
       fromGitHub
-          .updateStoryLabelsInTracker(loadJsonFixture("githubWebhookLabelAdd"))
+          .updateStoryLabelsInTracker(loadJsonFixture(githubWebhookFile))
+          .then(function () { done(); });
+    }
+
+    it("Updates tracker for a label add", function (done) {
+      checkTrackerUpdate(
+        "githubWebhookLabelAdd",
+        [{ id: 1234, name: "already there" }, { name: "help wanted" }],
+        done
+      );
+    });
+
+    it("Updates tracker for a label remove", function (done) {
+      checkTrackerUpdate("githubWebhookLabelRemove", [], done);
+    });
+
+    it("Does nothing when Tracker can't find the linked story", function (done) {
+      var trackerSearchEmptyResults = loadJsonFile("trackerSearchEmptyResults");
+
+      mitm.on("request", function (req, res) {
+        res.statusCode = 200;
+        if (req.method === "GET") {
+          if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A2%20includedone%3Atrue&envelope=true") {
+            res.end(trackerSearchEmptyResults);
+          } else {
+            ("Unexpected url requested: " + req.url).should.equal(null);
+          }
+        } else {
+          ("Should not be receiving a "+req.method+" request").should.equal(null);
+        }
+      });
+
+      var githubWebhookJson = loadJsonFixture("githubWebhookLabelAdd");
+      fromGitHub
+          .updateStoryLabelsInTracker(githubWebhookJson)
           .then(function () { done(); });
     });
 
@@ -82,7 +119,7 @@ describe("fromGitHub", function () {
       mitm.on("request", function (req, res) {
         res.statusCode = 200;
         if (req.method === "GET") {
-          if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A2&envelope=true") {
+          if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A2%20includedone%3Atrue&envelope=true") {
             res.end(trackerSearchLinkedStory);
           } else {
             ("Unexpected url requested: " + req.url).should.equal(null);
@@ -105,7 +142,7 @@ describe("fromGitHub", function () {
       mitm.on("request", function (req, res) {
         res.statusCode = 200;
         if (req.method === "GET") {
-          if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A2&envelope=true") {
+          if (req.url === "/services/v5/projects/" + projectId + "/search?query=external_id%3A2%20includedone%3Atrue&envelope=true") {
             res.end(trackerSearchLinkedStory);
           } else {
             ("Unexpected url requested: " + req.url).should.equal(null);
